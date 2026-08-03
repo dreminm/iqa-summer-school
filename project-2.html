@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Инструкция проекта: архитектуры IQA-голов для frozen CLIP и SigLIP 2.">
-  <title>Проект 2 · Архитектуры IQA-голов</title>
+  <meta name="description" content="Инструкция проекта: разработка Парето-оптимальной IQA-метрики для CLIP-based архитектур.">
+  <title>Проект 2 · Парето-оптимальная IQA-метрика</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="project-2">
@@ -22,16 +22,16 @@
 
   <main>
     <section class="hero project-hero container">
-      <p class="eyebrow">Проект 2 · Frozen VLM · IQA heads</p>
-      <h1>Архитектуры IQA-голов для frozen VLM</h1>
-      <p class="lede">Когда backbone нельзя дообучать, стоит ли доставать patch-токены и промежуточные слои — или сильного MLP над pooled feature уже достаточно?</p>
+      <p class="eyebrow">Проект 2 · CLIP-based encoders · Pareto IQA</p>
+      <h1>Парето-оптимальная IQA-метрика для CLIP-based архитектур</h1>
+      <p class="lede">Дан шортлист энкодеров, прошедших train-free screening. Нужно сравнить архитектуры IQA-голов и выбрать решения на Pareto-фронте OOD-качества и вычислительной стоимости.</p>
       <div class="hero-actions"><a class="button" href="#start">Начать за 60 минут</a><a class="button secondary" href="#heads">Пять голов</a></div>
     </section>
 
     <section class="section compact container">
       <div class="callout">
         <strong>Научный вопрос в одном предложении</strong>
-        Какая схема агрегации frozen VLM features лежит на Pareto-фронте macro OOD-SRCC × latency × trainable parameters, и сохраняется ли вывод между CLIP и SigLIP 2?
+        Какая IQA-голова даёт лучший компромисс macro OOD-SRCC × end-to-end latency × trainable parameters для отобранных CLIP-based энкодеров, и сохраняется ли ranking голов при расширении шортлиста?
       </div>
     </section>
 
@@ -49,7 +49,7 @@
     </nav>
 
     <section class="section container" id="baseline">
-      <div class="section-head"><div><p class="eyebrow">Исходная точка</p><h2>Baseline и исследуемая гипотеза</h2></div><p>WACV 2026 задаёт сильный baseline для pooled features. В этом проекте сравниваются способы агрегации patch- и intermediate-layer tokens при полностью frozen backbone.</p></div>
+      <div class="section-head"><div><p class="eyebrow">Исходная точка</p><h2>Baseline и исследуемая гипотеза</h2></div><p>WACV 2026 задаёт сильный baseline для pooled features. В проекте сравниваются головы, которые извлекают quality signal из pooled, patch- и intermediate-layer features полностью frozen CLIP-based энкодеров.</p></div>
       <div class="grid-2">
         <article class="card"><span class="status warn">Обязательный baseline</span><h3>Backbone + финальный MLP</h3><p>В схеме LoRA + трёхслойный MLP SigLIP 2 показал сильный результат, а gated activation заметно повлияла на качество. В школьной матрице этот результат представлен сопоставимой MLP-головой над frozen features.</p><p><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">Official code</a></p></article>
         <article class="card"><span class="status good">Исследуем в проекте</span><h3>Patch и intermediate tokens</h3><p>Сравните пространственную и межслойную агрегацию при полностью frozen backbone и mixed-dataset train.</p></article>
@@ -77,7 +77,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
     </section>
 
     <section class="section container" id="models">
-      <div class="section-head"><div><p class="eyebrow">Модели</p><h2>Два фиксированных энкодера</h2></div><p>Не смешивайте frozen и LoRA/full-finetune в основной таблице: это меняет вопрос и вычислительный бюджет.</p></div>
+      <div class="section-head"><div><p class="eyebrow">Модели</p><h2>Отобранные энкодеры и расширение шортлиста</h2></div><p>Core-протокол начинается с двух отобранных CLIP-based энкодеров. Дополнительные энкодеры подключаются после фиксации голов и правил сравнения.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>ID</th><th>Checkpoint</th><th>Зачем</th><th>Ограничение</th></tr></thead>
@@ -87,6 +87,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
           </tbody>
         </table>
       </div>
+      <div class="callout" style="margin-top:18px"><strong>Расширение шортлиста</strong>После core-матрицы можно добавить FastViT-HD или другой encoder, прошедший screening. Для честного сравнения он должен работать через тот же feature API; данные, головы и budget остаются неизменными, а latency и VRAM измеряются end-to-end при его нативном input resolution.</div>
       <div class="callout warning" style="margin-top:18px"><strong>Условия сопоставления с WACV 2026</strong>В статье используется <code>google/siglip2-so400m-patch16-512</code> и LoRA. Основная матрица проекта использует frozen-384, поэтому результаты следует маркировать как отдельный протокол. Официальный checkpoint можно запустить один раз как внешний sanity check.</div>
     </section>
 
@@ -218,7 +219,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
     </section>
   </main>
 
-  <footer class="footer"><div class="container"><span>Проект 2 · Архитектуры IQA-голов</span><a href="resources.html">Все датасеты и статьи →</a></div></footer>
+  <footer class="footer"><div class="container"><span>Проект 2 · Парето-оптимальная IQA-метрика</span><a href="resources.html">Все датасеты и статьи →</a></div></footer>
   <script src="assets/app.js"></script>
 </body>
 </html>
