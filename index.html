@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Две исследовательские темы по no-reference image quality assessment: научная ревизия, инструкции, датасеты и статьи.">
+  <title>IQA Summer R&D School</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="home">
+  <header class="site-header">
+    <nav class="nav container" aria-label="Основная навигация">
+      <a class="brand" href="index.html">IQA <span>R&D School</span></a>
+      <div class="nav-links">
+        <a aria-current="page" href="index.html">Главная</a>
+        <a href="project-1.html">Проект 1</a>
+        <a href="project-2.html">Проект 2</a>
+        <a href="resources.html">Ресурсы</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <p class="eyebrow">Летняя исследовательская школа · редакция 03.08.2026</p>
+      <h1>Не просто обучить метрику. Понять, почему она работает.</h1>
+      <p class="lede">Два проекта по no-reference image quality assessment, переработанные в проверяемые научные вопросы с чистыми сплитами, разумным GPU-бюджетом и понятным результатом за 10 рабочих дней.</p>
+      <div class="hero-actions">
+        <a class="button" href="#projects">Выбрать проект</a>
+        <a class="button secondary" href="#verdict">Прочитать ревизию</a>
+        <a class="button secondary" href="research-audit.md">Полный audit.md</a>
+      </div>
+    </section>
+
+    <section class="section container" id="projects">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Две команды · разные риски</p>
+          <h2>Проекты после ревизии</h2>
+        </div>
+        <p>Обе темы годятся для школы, но не в исходном виде. Первая сохраняет сильный научный вопрос; вторая переориентирована после работы WACV 2026, которая уже сравнила популярные энкодеры и MLP-активации.</p>
+      </div>
+      <div class="grid-2">
+        <article class="card project-card">
+          <div class="number">01 / distortion prior</div>
+          <span class="status good">Рекомендуется</span>
+          <h2>Как подавать информацию об искажении в NR-IQA?</h2>
+          <p>Контролируемое сравнение additive, FiLM и prefix/KV-conditioning при одном backbone, одном prior и одном бюджете параметров.</p>
+          <p class="small"><strong>Главный риск:</strong> утечка distortion-label и нечестный LODO.</p>
+          <a class="button" href="project-1.html">Инструкция команды 1</a>
+        </article>
+        <article class="card project-card alt">
+          <div class="number">02 / token aggregation</div>
+          <span class="status warn">Рекомендуется после сужения</span>
+          <h2>Как агрегировать токены frozen VLM для IQA?</h2>
+          <p>Сравнение MLP, query pooling, patch weighting и layer fusion на CLIP и SigLIP 2 по качеству, скорости и OOD-переносу.</p>
+          <p class="small"><strong>Главный риск:</strong> сетка из голов × энкодеров × датасетов разрастается быстрее школьного бюджета.</p>
+          <a class="button" href="project-2.html">Инструкция команды 2</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section container" id="verdict">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Короткий научный аудит</p>
+          <h2>Что пришлось исправить</h2>
+        </div>
+        <p>Ниже — изменения, без которых результат легко окажется красивой таблицей без надёжного вывода.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Пункт</th><th>В исходной версии</th><th>В рабочей версии</th></tr></thead>
+          <tbody>
+            <tr><td>MP-IQE</td><td>Будто использует готовый per-image embedding <code>d</code>.</td><td>У MP-IQE банк обучаемых scene/distortion prompts. В проекте отдельно и явно строится <code>d(x)</code>.</td></tr>
+            <tr><td>Blindness</td><td>Distortion label можно незаметно подать на тесте.</td><td>Основной prior — предсказанный frozen ARNIQA. Истинный label — только oracle-диагностика.</td></tr>
+            <tr><td>LODO</td><td>Объединение четырёх несовместимых таксономий.</td><td>Основной контролируемый LODO внутри KADID; внешние базы — отдельный cross-dataset тест.</td></tr>
+            <tr><td>Новизна темы 2</td><td>Общее сравнение SOTA-голов на двух VLM.</td><td>После WACV 2026 сравниваем именно агрегацию patch/intermediate tokens при frozen backbone.</td></tr>
+            <tr><td>«Как Q-Align»</td><td>Шесть held-out баз приписаны протоколу Q-Align.</td><td>Это собственный протокол. Q-Align обучает LMM на дискретных текстовых уровнях и имеет другой стек.</td></tr>
+            <tr><td>PIPAL / PieAPP</td><td>Обычные NR-IQA held-out датасеты.</td><td>Оба изначально full-reference; PieAPP ещё и pairwise. Они исключены из core, PIPAL оставлен stretch-тестом.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="grid-3">
+        <div class="card"><div class="kpi"><strong>10</strong><span>рабочих дней</span></div><p class="muted">Стандартный план. Для пяти дней берите только baseline + два варианта.</p></div>
+        <div class="card"><div class="kpi"><strong>1×</strong><span>24 GB GPU</span></div><p class="muted">Backbone frozen; mixed precision; общий forward для нескольких голов.</p></div>
+        <div class="card"><div class="kpi"><strong>3</strong><span>seed</span></div><p class="muted">Финальные выводы только с разбросом и bootstrap confidence interval.</p></div>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="callout warning">
+        <strong>Общий критерий хорошего школьного результата</strong>
+        Не «получили SOTA», а воспроизводимо ответили на один заранее заданный вопрос. Отрицательный результат с чистым протоколом — полноценный результат.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container"><span>IQA Summer R&D School</span><span>Научная ревизия: 3 августа 2026</span></div></footer>
+  <script src="assets/app.js"></script>
+</body>
+</html>
