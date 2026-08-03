@@ -22,7 +22,7 @@
 
   <main>
     <section class="hero project-hero container">
-      <p class="eyebrow">Проект 1 · основной риск — leakage</p>
+      <p class="eyebrow">Проект 1 · NR-IQA · Distortion prior</p>
       <h1>Conditioning NR-IQA на distortion prior</h1>
       <p class="lede">Как лучше внедрить предсказанную информацию об искажении: прибавить к queries, модулировать их через FiLM или дать отдельным prefix/KV-токеном?</p>
       <div class="hero-actions">
@@ -38,10 +38,21 @@
       </div>
     </section>
 
+    <nav class="project-toc container" aria-label="Содержание проекта">
+      <a href="#start"><span>01</span>Старт</a>
+      <a href="#data"><span>02</span>Данные</a>
+      <a href="#protocol"><span>03</span>Эксперимент</a>
+      <a href="#lodo"><span>04</span>LODO</a>
+      <a href="#metrics"><span>05</span>Метрики</a>
+      <a href="#plan"><span>06</span>План</a>
+      <a href="#reading"><span>07</span>Статьи</a>
+      <a href="#done"><span>08</span>Готовность</a>
+    </nav>
+
     <section class="section container" id="start">
       <div class="section-head">
         <div><p class="eyebrow">Первые 60 минут</p><h2>Сначала данные и два sanity check</h2></div>
-        <p>Не начинайте с семи архитектур. Сначала зафиксируйте manifest, split и baseline, который переобучается на 64 изображениях.</p>
+        <p>Результат этапа: manifest, воспроизводимый split и baseline, который переобучается на 64 изображениях.</p>
       </div>
       <div class="steps">
         <article class="step"><h3>Создайте окружение</h3><p>Установите PyTorch по <a href="https://pytorch.org/get-started/locally/">официальному селектору</a>, затем зависимости ниже. Зафиксируйте версии в первом коммите.</p></article>
@@ -61,13 +72,13 @@ git clone https://github.com/miccunifi/ARNIQA.git extern/ARNIQA
 git clone https://github.com/stephencurry-web/IQA.git extern/MP-IQE
 git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code></pre>
       <div class="callout warning">
-        <strong>Не копируйте MP-IQE как спецификацию проекта</strong>
-        В статье MP-IQE scene/distortion prompt banks сами являются queries. Здесь нужен отдельный per-image prior <code>d(x)</code>; это другая, более узкая постановка.
+        <strong>Как использовать MP-IQE</strong>
+        Возьмите из статьи схему работы с queries, но учтите различие: в MP-IQE scene/distortion prompt banks сами являются queries, а в этом проекте используется отдельный per-image prior <code>d(x)</code>.
       </div>
     </section>
 
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Core, external и stretch</h2></div><p>Четыре синтетические базы в одном train не нужны: их таксономии и шкалы не совпадают, а LODO становится двусмысленным.</p></div>
+    <section class="section container" id="data">
+      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Core, external и stretch</h2></div><p>Core-эксперимент обучается на KADID-10k. CSIQ, TID2013 и LIVE используются только для проверки переноса без подстройки.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Роль</th><th>Датасет</th><th>Что делать</th><th>Ссылка</th></tr></thead>
@@ -119,8 +130,8 @@ git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code>
       <p class="small">Дополнительно: oracle <code>d</code> и deliberately wrong family. Attention-weight на prefix-токене сам по себе не считается объяснением.</p>
     </section>
 
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">LODO без самообмана</p><h2>Два разных утверждения</h2></div><p>ARNIQA видел синтетические искажения при своём pretraining. Поэтому надо разделять перенос обучаемой IQA-головы и перенос всей системы.</p></div>
+    <section class="section container" id="lodo">
+      <div class="section-head"><div><p class="eyebrow">Протокол LODO</p><h2>Разделите два уровня переноса</h2></div><p>ARNIQA видел синтетические искажения при pretraining. Поэтому отдельно оцениваются перенос обучаемой IQA-головы и перенос всей системы.</p></div>
       <div class="grid-2">
         <div class="card"><span class="status good">Head-LODO</span><h3>Практичный core</h3><p>Frozen ARNIQA разрешён. Из train IQA-head удаляется одно заранее зафиксированное семейство KADID. Это тест: умеет ли механизм conditioning переносить prior на новый тип для головы.</p></div>
         <div class="card"><span class="status warn">Strict system-LODO</span><h3>Только как дополнительный тест</h3><p>Ни один обучаемый или pre-trained модуль не должен был видеть held-out искажение. Для ARNIQA это обычно нельзя гарантировать; не называйте Head-LODO строгим system-LODO.</p></div>
@@ -128,7 +139,7 @@ git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code>
       <div class="callout warning" style="margin-top:18px"><strong>Зафиксируйте до запуска</strong>Используйте семь групп с официальной страницы KADID: blur 01–03, color 04–08, compression 09–10, noise 11–15, brightness 16–18, spatial 19–23, sharpness/contrast 24–25. Для каждого LODO-fold train/val/test остаются reference-disjoint; seeds <code>8, 19, 25</code>. После первого результата mapping не менять.</div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="metrics">
       <div class="section-head"><div><p class="eyebrow">Метрики и критерий победы</p><h2>Что попадёт в финальную таблицу</h2></div><p>SRCC — основной показатель. PLCC считать после одной и той же нелинейной калибровки либо честно указывать raw PLCC.</p></div>
       <div class="table-wrap">
         <table>
@@ -144,7 +155,7 @@ git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code>
       <div class="callout" style="margin-top:18px"><strong>Заранее заданный успех</strong>Conditioning считается полезным, если лучший вариант даёт не меньше +0.01 macro OOD-SRCC к V0, CI разности не пересекает 0, а shuffled prior заметно ухудшает результат. Если нет — хороший вывод звучит: «при данном backbone и prior механизм инъекции не важен / prior не используется».</div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="plan">
       <div class="section-head"><div><p class="eyebrow">План на 10 дней</p><h2>Критический путь</h2></div><p>Каждый день заканчивается артефактом в репозитории, а не только устным статусом.</p></div>
       <div class="card timeline">
         <div class="day"><div class="day-label">День 1</div><div><h3>Data contract</h3><p>Manifest, score direction, reference-disjoint split, 30 ручных визуальных проверок.</p></div></div>
@@ -166,10 +177,10 @@ git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code>
         <article class="paper"><div class="paper-order">4</div><div><h3>DR.Experts · Distortion-Aware Experts</h3><p>AAAI 2026: distortion-specific priors + dynamic MoE. Это близкий prior art для stretch-V4.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/37401/41363">Paper</a></div></div></article>
         <article class="paper"><div class="paper-order">5</div><div><h3>CLIP-IQA</h3><p>Антонимные prompts и visual attributes. Полезно как alternative feature source, но не как готовый distortion-type encoder.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/25353/25125">Paper</a><a href="https://github.com/IceClear/CLIP-IQA">Code</a></div></div></article>
       </div>
-      <details style="margin-top:14px"><summary>Ещё два близких результата, которые надо упомянуть в related work</summary><p><a href="https://scholar.pku.edu.cn/ttjiang/publications/adaptive-prompt-learning-blind-image-quality-assessment-multi-modal-mixed">MMP-IQA / Adaptive Prompt Learning (ACM MM 2025)</a> использует instance-conditioned prompt context. Свежий preprint <a href="https://arxiv.org/abs/2606.02002">Distortion-Aware Fusion of Statistical and VLM Features (2026)</a> применяет multiplicative gating. Они уменьшают широту claim о новизне, но не дают контролируемого additive-vs-FiLM-vs-prefix сравнения.</p></details>
+      <details style="margin-top:14px"><summary>Дополнительные работы для related work</summary><p><a href="https://scholar.pku.edu.cn/ttjiang/publications/adaptive-prompt-learning-blind-image-quality-assessment-multi-modal-mixed">MMP-IQA / Adaptive Prompt Learning (ACM MM 2025)</a> использует instance-conditioned prompt context. Preprint <a href="https://arxiv.org/abs/2606.02002">Distortion-Aware Fusion of Statistical and VLM Features (2026)</a> применяет multiplicative gating. Сопоставьте их постановки с вашим контролируемым сравнением additive, FiLM и prefix.</p></details>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="done">
       <div class="section-head"><div><p class="eyebrow">Definition of done</p><h2>Чек-лист команды</h2></div><p>Состояние сохраняется только в этом браузере.</p></div>
       <div class="card">
         <div class="progress"><span data-progress></span></div><div class="progress-copy" data-progress-copy></div>
