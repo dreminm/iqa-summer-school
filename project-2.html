@@ -22,7 +22,7 @@
 
   <main>
     <section class="hero project-hero container">
-      <p class="eyebrow">Проект 2 · основной риск — scope explosion</p>
+      <p class="eyebrow">Проект 2 · Frozen VLM · Token aggregation</p>
       <h1>Token aggregation для frozen VLM в NR-IQA</h1>
       <p class="lede">Когда backbone нельзя дообучать, стоит ли доставать patch-токены и промежуточные слои — или сильного MLP над pooled feature уже достаточно?</p>
       <div class="hero-actions"><a class="button" href="#start">Начать за 60 минут</a><a class="button secondary" href="#heads">Пять голов</a></div>
@@ -35,11 +35,23 @@
       </div>
     </section>
 
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Почему тема изменилась</p><h2>Что уже сделал WACV 2026</h2></div><p>Нельзя заявлять общую новизну «сравним backbone и головы»: ближайшая работа уже систематически сравнила CLIP, SigLIP 2, DINOv2/3, Perception и ResNet, а также варианты активаций.</p></div>
+    <nav class="project-toc container" aria-label="Содержание проекта">
+      <a href="#baseline"><span>01</span>Baseline</a>
+      <a href="#start"><span>02</span>Старт</a>
+      <a href="#models"><span>03</span>Модели</a>
+      <a href="#data"><span>04</span>Данные</a>
+      <a href="#heads"><span>05</span>Головы</a>
+      <a href="#protocol"><span>06</span>Протокол</a>
+      <a href="#plan"><span>07</span>План</a>
+      <a href="#reading"><span>08</span>Статьи</a>
+      <a href="#done"><span>09</span>Готовность</a>
+    </nav>
+
+    <section class="section container" id="baseline">
+      <div class="section-head"><div><p class="eyebrow">Исходная точка</p><h2>Baseline и исследуемая гипотеза</h2></div><p>WACV 2026 задаёт сильный baseline для pooled features. В этом проекте сравниваются способы агрегации patch- и intermediate-layer tokens при полностью frozen backbone.</p></div>
       <div class="grid-2">
-        <article class="card"><span class="status stop">Уже покрыто</span><h3>Backbone + финальный MLP</h3><p>В одинаковой схеме LoRA + трёхслойный MLP SigLIP 2 оказался стабильно сильным, а gated activation изменила результат. Это обязательный strong baseline.</p><p><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">Official code</a></p></article>
-        <article class="card"><span class="status good">Остаётся открытым</span><h3>Patch и intermediate tokens</h3><p>У WACV-работы главный эксперимент — над итоговым feature. Проект школы изолирует способы пространственной и межслойной агрегации при полностью frozen backbone и mixed-dataset train.</p></article>
+        <article class="card"><span class="status warn">Обязательный baseline</span><h3>Backbone + финальный MLP</h3><p>В схеме LoRA + трёхслойный MLP SigLIP 2 показал сильный результат, а gated activation заметно повлияла на качество. В школьной матрице этот результат представлен сопоставимой MLP-головой над frozen features.</p><p><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">Official code</a></p></article>
+        <article class="card"><span class="status good">Исследуем в проекте</span><h3>Patch и intermediate tokens</h3><p>Сравните пространственную и межслойную агрегацию при полностью frozen backbone и mixed-dataset train.</p></article>
       </div>
     </section>
 
@@ -63,7 +75,7 @@ git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch
 git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="models">
       <div class="section-head"><div><p class="eyebrow">Модели</p><h2>Два фиксированных энкодера</h2></div><p>Не смешивайте frozen и LoRA/full-finetune в основной таблице: это меняет вопрос и вычислительный бюджет.</p></div>
       <div class="table-wrap">
         <table>
@@ -74,11 +86,11 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
           </tbody>
         </table>
       </div>
-      <div class="callout warning" style="margin-top:18px"><strong>Репликация ближайшей работы</strong>WACV 2026 использует <code>google/siglip2-so400m-patch16-512</code> и LoRA. Не называйте числа frozen-384 прямой репликацией. Один smoke-run их официального checkpoint полезен как внешний sanity check, но не входит в общую матрицу.</div>
+      <div class="callout warning" style="margin-top:18px"><strong>Условия сопоставления с WACV 2026</strong>В статье используется <code>google/siglip2-so400m-patch16-512</code> и LoRA. Основная матрица проекта использует frozen-384, поэтому результаты следует маркировать как отдельный протокол. Официальный checkpoint можно запустить один раз как внешний sanity check.</div>
     </section>
 
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Три train + четыре core held-out</h2></div><p>Протокол вдохновлён mixed-data экспериментом Q-Align, но не является тем же протоколом: архитектура, target и набор тестов другие.</p></div>
+    <section class="section container" id="data">
+      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Три train + четыре core held-out</h2></div><p>Обучение идёт на объединении KADID-10k, KonIQ-10k и SPAQ. Четыре held-out базы используются только для финальной OOD-оценки.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Роль</th><th>Датасет</th><th>Score</th><th>Ссылка</th></tr></thead>
@@ -119,7 +131,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
       <div class="callout warning" style="margin-top:18px"><strong>Не кэшируйте четыре слоя без расчёта</strong>Для CLIP L/14@336 один last-layer tensor — примерно 577×1024 значений на image. В fp16 это около 1.18 MB/image; четыре слоя для 31k train images — порядка 146 GB до metadata. Предпочтителен online shared-forward; cache только pooled features и, при необходимости, последний слой.</div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="protocol">
       <div class="section-head"><div><p class="eyebrow">Единый train protocol</p><h2>Что нельзя менять между головами</h2></div><p>Иначе comparison превращается в набор отдельных моделей, где непонятно, что именно дало выигрыш.</p></div>
       <div class="grid-2">
         <div class="card">
@@ -144,7 +156,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
       <div class="callout danger" style="margin-top:18px"><strong>Запрещённая утечка</strong>Не используйте OOD test для выбора epoch, head width, layer indices или loss. Даже однократный «посмотрели и поправили» превращает held-out в validation.</div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="pareto">
       <div class="section-head"><div><p class="eyebrow">Pareto</p><h2>Оси зафиксировать до запуска</h2></div><p>«Pareto-optimal» имеет смысл только с заранее определёнными осями и процедурой измерения.</p></div>
       <div class="table-wrap">
         <table>
@@ -161,7 +173,7 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
       <div class="callout" style="margin-top:18px"><strong>Заранее заданный успех</strong>Сложная агрегация оправдана, если улучшает macro OOD-SRCC не меньше чем на +0.01 к H1, выигрывает минимум на 3 из 4 held-out баз и остаётся ≤2M trainable params. Иначе практический победитель — H1, и это ценный отрицательный результат.</div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="plan">
       <div class="section-head"><div><p class="eyebrow">План на 10 дней</p><h2>Сначала один encoder, потом перенос</h2></div><p>Полная сетка запускается каскадом: слабые головы на E1 не получают автоматически дорогой E2 sweep.</p></div>
       <div class="card timeline">
         <div class="day"><div class="day-label">День 1</div><div><h3>Data audit</h3><p>Manifest, score direction, split policy, 30 визуальных samples на базу.</p></div></div>
@@ -178,16 +190,16 @@ git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
     <section class="section container" id="reading">
       <div class="section-head"><div><p class="eyebrow">Читать в этом порядке</p><h2>Шесть работ, из них четыре обязательные</h2></div><p>Для каждой архитектуры команда формулирует минимальную версию, которую можно честно сравнить при ≤2M параметров.</p></div>
       <div class="reading-list">
-        <article class="paper"><div class="paper-order">1</div><div><h3>Revisiting Vision–Language Foundations for NR-IQA · WACV 2026</h3><p>Самый важный baseline и причина сужения темы; backbone/activation study и официальный код.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a><a href="https://github.com/drkkgy/NR_IQA_AGM">Code</a></div></div></article>
+        <article class="paper"><div class="paper-order">1</div><div><h3>Revisiting Vision–Language Foundations for NR-IQA · WACV 2026</h3><p>Главный baseline: сравнение backbone, активаций и официальный код AGM-головы.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a><a href="https://github.com/drkkgy/NR_IQA_AGM">Code</a></div></div></article>
         <article class="paper"><div class="paper-order">2</div><div><h3>DEIQT · Attention-Panel Decoder</h3><p>Quality queries и cross-attention над ViT tokens; прототип для H2.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/25302">Paper</a><a href="https://github.com/narthchin/DEIQT">Code</a></div></div></article>
         <article class="paper"><div class="paper-order">3</div><div><h3>WaDIQaM · Patch score and weight</h3><p>Классическая явная агрегация локальных quality scores и importance weights; прототип H3.</p><div class="paper-links"><a href="https://arxiv.org/abs/1612.01697">Paper</a><a href="https://github.com/ma3252788/Deep-Neural-Networks-for-No-Reference-and-Full-Reference-Image-Quality-Assessment">Reference code</a></div></div></article>
         <article class="paper"><div class="paper-order">4</div><div><h3>TOPIQ · Top-down Semantics to Distortions</h3><p>Мотивация для межслойной fusion: high-level semantics направляет low-level distortion features.</p><div class="paper-links"><a href="https://arxiv.org/abs/2308.03060">Paper</a><a href="https://github.com/chaofengc/IQA-PyTorch">Code in pyiqa</a></div></div></article>
         <article class="paper"><div class="paper-order">5</div><div><h3>MANIQA</h3><p>Multi-dimension attention и weighted pooling над ViT features. Читать как альтернативу H3/H4, не копировать целиком.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/papers/Yang_MANIQA_Multi-Dimension_Attention_Network_for_No-Reference_Image_Quality_Assessment_CVPRW_2022_paper.pdf">Paper</a><a href="https://github.com/IIGROUP/MANIQA">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">6</div><div><h3>Q-Align · Discrete Text-Defined Levels</h3><p>Нужен, чтобы корректно описать mixed-data inspiration и не называть свой протокол прямой репликацией.</p><div class="paper-links"><a href="https://proceedings.mlr.press/v235/wu24ah.html">Paper</a><a href="https://github.com/Q-Future/Q-Align">Code</a></div></div></article>
+        <article class="paper"><div class="paper-order">6</div><div><h3>Q-Align · Discrete Text-Defined Levels</h3><p>Пример mixed-data training и альтернативной постановки IQA через дискретные текстовые уровни.</p><div class="paper-links"><a href="https://proceedings.mlr.press/v235/wu24ah.html">Paper</a><a href="https://github.com/Q-Future/Q-Align">Code</a></div></div></article>
       </div>
     </section>
 
-    <section class="section container">
+    <section class="section container" id="done">
       <div class="section-head"><div><p class="eyebrow">Definition of done</p><h2>Чек-лист команды</h2></div><p>Состояние сохраняется только в этом браузере.</p></div>
       <div class="card">
         <div class="progress"><span data-progress></span></div><div class="progress-copy" data-progress-copy></div>
