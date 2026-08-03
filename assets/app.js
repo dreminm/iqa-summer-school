@@ -34,3 +34,27 @@ if (filter) {
     });
   });
 }
+
+const tocLinks = [...document.querySelectorAll('.project-toc a[href^="#"]')];
+if (tocLinks.length && "IntersectionObserver" in window) {
+  const sections = tocLinks
+    .map(link => document.querySelector(link.getAttribute("href")))
+    .filter(Boolean);
+
+  const setCurrent = id => {
+    tocLinks.forEach(link => {
+      const active = link.getAttribute("href") === `#${id}`;
+      if (active) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    });
+  };
+
+  const observer = new IntersectionObserver(entries => {
+    const visible = entries
+      .filter(entry => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (visible) setCurrent(visible.target.id);
+  }, { rootMargin: "-24% 0px -64%", threshold: [0, .1, .4] });
+
+  sections.forEach(section => observer.observe(section));
+}
