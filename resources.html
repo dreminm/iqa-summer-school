@@ -1,94 +1,34 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Каталог официальных датасетов, статей, моделей и репозиториев для IQA R&D школы.">
-  <title>Ресурсы · IQA R&D School</title>
+  <meta name="description" content="Project resources for the Image Quality R&D School.">
+  <title>Project Resources · Image Quality R&D School</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="resources">
   <header class="site-header">
-    <nav class="nav container" aria-label="Основная навигация">
-      <a class="brand" href="index.html">IQA <span>R&D School</span></a>
-      <div class="nav-links">
-        <a href="index.html">Главная</a>
-        <a href="project-1.html">Проект 1</a>
-        <a href="project-2.html">Проект 2</a>
-        <a aria-current="page" href="resources.html">Ресурсы</a>
-      </div>
-    </nav>
+    <div class="nav shell">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">IQ</span>
+        <span class="brand-copy"><strong>Image Quality</strong><small>R&amp;D School</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="project-1.html">Project 01</a>
+        <a href="project-2.html">Project 02</a>
+      </nav>
+    </div>
   </header>
-
-  <main>
-    <section class="hero project-hero container">
-      <p class="eyebrow">Единый каталог</p>
-      <h1>Данные, статьи и стартовый код</h1>
-      <p class="lede">Сначала официальные источники. Зеркала — только для удобной загрузки; лицензия и условия использования всегда берутся у владельца датасета.</p>
-    </section>
-
-    <section class="section compact container">
-      <label for="filter"><strong>Фильтр ресурсов</strong></label>
-      <input id="filter" data-resource-filter type="search" placeholder="Например: KADID, prompt, SigLIP…" style="display:block;width:100%;margin-top:8px;padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:var(--paper);font:inherit">
-    </section>
-
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Datasets</p><h2>Скачать до школы</h2></div><p>LIVE и CLIVE требуют форму/ручной доступ. Запросите их заранее; KADID, TID, CSIQ, KonIQ, SPAQ и AGIQA можно готовить параллельно.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Название</th><th>Тип / объём</th><th>Использование</th><th>Источники</th></tr></thead>
-          <tbody>
-            <tr data-resource><td>KADID-10k</td><td>Synthetic · 10 125 distorted · 81 references</td><td>Core проекта 1; train проекта 2</td><td><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official</a> · <a href="https://huggingface.co/datasets/chaofengc/IQA-PyTorch-Datasets">mirror</a></td></tr>
-            <tr data-resource><td>KonIQ-10k</td><td>Authentic · 10 073</td><td>Train проекта 2</td><td><a href="https://darus.uni-stuttgart.de/dataset.xhtml?persistentId=doi%3A10.18419%2Fdarus-2435">Official DOI</a></td></tr>
-            <tr data-resource><td>SPAQ</td><td>Smartphone · 11 125</td><td>Train проекта 2</td><td><a href="https://github.com/h4nwei/SPAQ">Official repo</a></td></tr>
-            <tr data-resource><td>CSIQ</td><td>Synthetic · 866 distorted · 30 references</td><td>OOD test обоих проектов</td><td><a href="https://s2.smu.edu/~eclarson/csiq.html">Author</a> · <a href="https://qualinet.github.io/databases/image/categorical_image_quality_csiq_database/">files</a></td></tr>
-            <tr data-resource><td>TID2013</td><td>Synthetic · 3 000 distorted · 25 references</td><td>OOD test обоих проектов</td><td><a href="https://www.ponomarenko.info/tid2013.htm">Official</a></td></tr>
-            <tr data-resource><td>LIVE IQA</td><td>Synthetic · 779 distorted · 29 references</td><td>Optional OOD проекта 1</td><td><a href="https://live.ece.utexas.edu/research/Quality/subjective.htm">Official · form</a></td></tr>
-            <tr data-resource><td>LIVE Challenge / CLIVE</td><td>Authentic · 1 162</td><td>Core OOD проекта 2</td><td><a href="https://live.ece.utexas.edu/research/ChallengeDB/">Official · form</a></td></tr>
-            <tr data-resource><td>AGIQA-3K</td><td>Generated · 2 982</td><td>Core OOD проекта 2</td><td><a href="https://github.com/lcysyzxdxc/AGIQA-3k-Database">Official</a> · <a href="https://huggingface.co/datasets/strawhat/agiqa-3k">mirror</a></td></tr>
-            <tr data-resource><td>PIPAL</td><td>Restoration / full-reference · ~29k distorted</td><td>Stretch проекта 2</td><td><a href="https://github.com/HaomingCai/PIPAL-dataset">Official</a> · <a href="https://www.ecva.net/papers/eccv_2020/papers_ECCV/papers/123560613.pdf">paper</a></td></tr>
-            <tr data-resource><td>PieAPP</td><td>Pairwise full-reference · 20 280 distorted</td><td>Не входит в core</td><td><a href="https://github.com/prashnani/PerceptualImageError">Official</a></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <details style="margin-top:14px"><summary>Быстрый единый loader через IQA-PyTorch</summary><p><a href="https://github.com/chaofengc/IQA-PyTorch">IQA-PyTorch / pyiqa</a> содержит loaders и инструкции для многих IQA-баз. Используйте его как convenience layer, но храните собственный immutable manifest и проверяйте split: удобный loader не гарантирует нужный именно вам reference-disjoint протокол.</p><pre><code>pip install git+https://github.com/chaofengc/IQA-PyTorch.git
-# Документация по структуре и загрузке:
-# https://github.com/chaofengc/IQA-PyTorch/blob/main/docs/Dataset_Preparation.md</code></pre></details>
-    </section>
-
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Papers</p><h2>Обязательное ядро</h2></div><p>Это не исчерпывающий обзор IQA. Это минимальный набор, который меняет дизайн экспериментов двух команд.</p></div>
-      <div class="grid-2">
-        <article class="card" data-resource><span class="tag">prompts · project 1</span><h3>MP-IQE</h3><p>Prompt banks сцен и искажений как queries; visual prompt tuning.</p><p><a href="https://arxiv.org/html/2404.14949v2">Paper</a> · <a href="https://github.com/stephencurry-web/IQA">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">prior · project 1</span><h3>ARNIQA</h3><p>Self-supervised learning distortion manifold; основной frozen prior.</p><p><a href="https://arxiv.org/abs/2310.14918">Paper</a> · <a href="https://github.com/miccunifi/ARNIQA">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">VLM · project 1</span><h3>LIQE</h3><p>Joint quality/scene/distortion modelling через vision-language correspondence.</p><p><a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zhang_Blind_Image_Quality_Assessment_via_Vision-Language_Correspondence_A_Multitask_Learning_CVPR_2023_paper.pdf">Paper</a> · <a href="https://github.com/zwx8981/LIQE">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">MoE · project 1</span><h3>DR.Experts</h3><p>AAAI 2026: distortion-specific priors, differential refinement, dynamic expert weighting.</p><p><a href="https://ojs.aaai.org/index.php/AAAI/article/view/37401/41363">Paper</a></p></article>
-        <article class="card" data-resource><span class="tag">baseline · project 2</span><h3>Revisiting V-L Foundations for NR-IQA</h3><p>WACV 2026: six backbones, activation study, SigLIP 2 baseline.</p><p><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">queries · project 2</span><h3>DEIQT</h3><p>Quality-aware decoder и attention panel над ViT features.</p><p><a href="https://ojs.aaai.org/index.php/AAAI/article/view/25302">Paper</a> · <a href="https://github.com/narthchin/DEIQT">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">patches · project 2</span><h3>WaDIQaM</h3><p>Локальные quality scores и learned importance pooling.</p><p><a href="https://arxiv.org/abs/1612.01697">Paper</a> · <a href="https://github.com/ma3252788/Deep-Neural-Networks-for-No-Reference-and-Full-Reference-Image-Quality-Assessment">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">fusion · project 2</span><h3>TOPIQ</h3><p>Top-down cross-scale interaction: semantics направляет поиск локальных искажений.</p><p><a href="https://arxiv.org/abs/2308.03060">Paper</a> · <a href="https://github.com/chaofengc/IQA-PyTorch">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">attention · project 2</span><h3>MANIQA</h3><p>Multi-dimension attention и weighted pooling над ViT features.</p><p><a href="https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/papers/Yang_MANIQA_Multi-Dimension_Attention_Network_for_No-Reference_Image_Quality_Assessment_CVPRW_2022_paper.pdf">Paper</a> · <a href="https://github.com/IIGROUP/MANIQA">Code</a></p></article>
-        <article class="card" data-resource><span class="tag">protocol · project 2</span><h3>Q-Align</h3><p>LMM и пять дискретных текстовых уровней; источник mixed-data inspiration, не direct baseline для frozen heads.</p><p><a href="https://proceedings.mlr.press/v235/wu24ah.html">Paper</a> · <a href="https://github.com/Q-Future/Q-Align">Code</a></p></article>
-      </div>
-    </section>
-
-    <section class="section container">
-      <div class="section-head"><div><p class="eyebrow">Checkpoints</p><h2>Точные имена моделей</h2></div><p>Запишите revision hash Hugging Face и версию Transformers в run config: имя checkpoint без revision недостаточно для долгой воспроизводимости.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Назначение</th><th>Checkpoint / repo</th></tr></thead>
-          <tbody>
-            <tr data-resource><td>CLIP L/14 @336</td><td><a href="https://huggingface.co/openai/clip-vit-large-patch14-336"><code>openai/clip-vit-large-patch14-336</code></a></td></tr>
-            <tr data-resource><td>SigLIP 2 So400m @384</td><td><a href="https://huggingface.co/google/siglip2-so400m-patch16-384"><code>google/siglip2-so400m-patch16-384</code></a></td></tr>
-            <tr data-resource><td>WACV 2026 exact baseline @512</td><td><a href="https://huggingface.co/google/siglip2-so400m-patch16-512"><code>google/siglip2-so400m-patch16-512</code></a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">adapters</a></td></tr>
-            <tr data-resource><td>ARNIQA encoder / weights</td><td><a href="https://github.com/miccunifi/ARNIQA"><code>miccunifi/ARNIQA</code></a></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <main class="simple-page shell">
+    <p class="kicker">Project resources</p>
+    <h1>Start with the project guide</h1>
+    <p>Dataset downloads, required papers, baseline specifications, and repository structure are embedded directly in each guide.</p>
+    <div class="simple-links">
+      <a href="project-1.html"><span>01</span><strong>Distortion-Conditioned NR-IQA</strong></a>
+      <a href="project-2.html"><span>02</span><strong>Pareto-Optimal IQA for CLIP-Based Architectures</strong></a>
+    </div>
   </main>
-
-  <footer class="footer"><div class="container"><span>IQA resources</span><span>Проверено 3 августа 2026</span></div></footer>
-  <script src="assets/app.js"></script>
 </body>
 </html>
