@@ -1,36 +1,21 @@
-# IQA Summer R&D School — GitHub Pages
+# Image Quality R&D School
 
-Статический русскоязычный сайт для двух исследовательских команд. Сборка не нужна: достаточно HTML, CSS и JavaScript.
+A static GitHub Pages site for two student research projects in no-reference image quality assessment.
 
-## Что внутри
+## Pages
 
-- `index.html` — выбор проекта и научный вердикт;
-- `project-1.html` — conditioning NR-IQA на distortion prior;
-- `project-2.html` — token aggregation для frozen VLM;
-- `resources.html` — единый каталог датасетов, статей и репозиториев;
-- `research-audit.md` — развёрнутая ревизия исходных постановок;
-- `.github/workflows/pages.yml` — публикация через GitHub Actions.
+- `index.html` — project selection
+- `project-1.html` — Distortion-Conditioned NR-IQA
+- `project-2.html` — Pareto-Optimal IQA for CLIP-Based Architectures
+- `resources.html` — compatibility page that routes readers to the project guides
+- `assets/styles.css` — shared visual system
 
-## Публикация за 3 минуты
+The site uses plain HTML and CSS and requires no build step.
 
-1. Создайте пустой публичный репозиторий. Для главной страницы организации используйте имя `<org>.github.io`; для страницы проекта подойдёт любое имя.
-2. Скопируйте содержимое этой папки в корень репозитория и отправьте в ветку `main`.
-3. Откройте **Settings → Pages → Build and deployment → Source** и выберите **GitHub Actions**.
-4. После завершения workflow адрес будет показан в **Settings → Pages**.
-
-Локальная проверка:
+## Local preview
 
 ```bash
-python -m http.server 8000 --directory .
+python -m http.server 8000
 ```
 
-Затем откройте `http://localhost:8000`.
-
-## Что нужно заменить перед публикацией
-
-- название школы и контакты ментора в нижней части страниц;
-- ссылку на рабочий репозиторий команд;
-- длительность, если школа короче или длиннее заложенных 10 рабочих дней;
-- GPU-бюджет в карточке ограничений.
-
-Последняя научная ревизия: 3 августа 2026 года.
+Open `http://localhost:8000`.
