@@ -1,204 +1,202 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Инструкция проекта: conditioning NR-IQA на предсказанный distortion prior.">
-  <title>Проект 1 · Distortion conditioning</title>
+  <meta name="description" content="Student guide for the Distortion-Conditioned NR-IQA research project.">
+  <title>Project 01 · Distortion-Conditioned NR-IQA</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="project-1">
   <header class="site-header">
-    <nav class="nav container" aria-label="Основная навигация">
-      <a class="brand" href="index.html">IQA <span>R&D School</span></a>
-      <div class="nav-links">
-        <a href="index.html">Главная</a>
-        <a aria-current="page" href="project-1.html">Проект 1</a>
-        <a href="project-2.html">Проект 2</a>
-        <a href="resources.html">Ресурсы</a>
-      </div>
-    </nav>
+    <div class="nav shell">
+      <a class="brand" href="index.html" aria-label="Image Quality R&D School home">
+        <span class="brand-mark" aria-hidden="true">IQ</span>
+        <span class="brand-copy"><strong>Image Quality</strong><small>R&amp;D School</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="project-1.html" aria-current="page">Project 01</a>
+        <a href="project-2.html">Project 02</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <section class="hero project-hero container">
-      <p class="eyebrow">Проект 1 · NR-IQA · Distortion prior</p>
-      <h1>Conditioning NR-IQA на distortion prior</h1>
-      <p class="lede">Как лучше внедрить предсказанную информацию об искажении: прибавить к queries, модулировать их через FiLM или дать отдельным prefix/KV-токеном?</p>
-      <div class="hero-actions">
-        <a class="button" href="#start">Начать за 60 минут</a>
-        <a class="button secondary" href="#protocol">Эксперимент</a>
-      </div>
+    <section class="project-hero shell">
+      <p class="kicker">Project 01 · No-reference IQA</p>
+      <h1>Distortion-Conditioned NR-IQA</h1>
+      <p class="hero-question">Does a predicted distortion representation improve blind image-quality prediction—and which injection mechanism works best?</p>
+      <dl class="project-facts">
+        <div><dt>Core data</dt><dd>KADID-10k</dd></div>
+        <div><dt>Image encoder</dt><dd>Frozen CLIP ViT-B/16</dd></div>
+        <div><dt>Primary metric</dt><dd>OOD SRCC</dd></div>
+        <div><dt>Final artifact</dt><dd>Controlled comparison</dd></div>
+      </dl>
     </section>
 
-    <section class="section compact container">
-      <div class="callout">
-        <strong>Научный вопрос в одном предложении</strong>
-        При фиксированных backbone, <code>d(x)</code>, trainable budget и loss какой механизм conditioning даёт лучший OOD-SRCC — и использует ли модель prior причинно, а не декоративно?
-      </div>
-    </section>
-
-    <nav class="project-toc container" aria-label="Содержание проекта">
-      <a href="#start"><span>01</span>Старт</a>
-      <a href="#data"><span>02</span>Данные</a>
-      <a href="#protocol"><span>03</span>Эксперимент</a>
-      <a href="#lodo"><span>04</span>LODO</a>
-      <a href="#metrics"><span>05</span>Метрики</a>
-      <a href="#plan"><span>06</span>План</a>
-      <a href="#reading"><span>07</span>Статьи</a>
-      <a href="#done"><span>08</span>Готовность</a>
+    <nav class="section-nav shell" aria-label="Project sections">
+      <a href="#problem">Problem</a>
+      <a href="#baseline">Baseline</a>
+      <a href="#start">First steps</a>
+      <a href="#result">Expected result</a>
     </nav>
 
-    <section class="section container" id="start">
-      <div class="section-head">
-        <div><p class="eyebrow">Первые 60 минут</p><h2>Сначала данные и два sanity check</h2></div>
-        <p>Результат этапа: manifest, воспроизводимый split и baseline, который переобучается на 64 изображениях.</p>
-      </div>
-      <div class="steps">
-        <article class="step"><h3>Создайте окружение</h3><p>Установите PyTorch по <a href="https://pytorch.org/get-started/locally/">официальному селектору</a>, затем зависимости ниже. Зафиксируйте версии в первом коммите.</p></article>
-        <article class="step"><h3>Скачайте только KADID-10k</h3><p>Основной источник: <a href="https://database.mmsp-kn.de/kadid-10k-database.html">официальная страница KADID-10k</a>. Быстрый учебный путь — зеркало <a href="https://huggingface.co/datasets/chaofengc/IQA-PyTorch-Datasets">IQA-PyTorch Datasets</a>. Сохраните исходный <code>dmos.csv</code> без правок.</p></article>
-        <article class="step"><h3>Соберите единый manifest</h3><p>Одна строка на изображение: <code>path, score_raw, score_01, reference_id, distortion_id, severity</code>. Split делается по <code>reference_id</code>, не по файлам.</p></article>
-        <article class="step"><h3>Запустите две проверки</h3><p>(a) один batch проходит вперёд-назад; (b) модель достигает почти нулевой train-loss на 64 изображениях. Только после этого запускайте baseline.</p></article>
-      </div>
+    <div class="brief shell">
+      <section class="brief-section" id="problem">
+        <div class="section-label"><span>01</span><h2>Problem</h2></div>
+        <div class="section-content">
+          <p class="section-intro">Most NR-IQA models infer quality directly from image features. This project tests whether a separate, image-specific distortion representation <code>d(x)</code> makes the quality head more accurate on unseen distortion families.</p>
 
-      <pre><code>python -m venv .venv
-source .venv/bin/activate
-# Сначала установите torch/torchvision под вашу CUDA с pytorch.org
-pip install transformers accelerate pandas scipy scikit-learn openpyxl \
-  einops timm pyiqa wandb
+          <div class="research-question">
+            <span>Research question</span>
+            <strong>With the image encoder, prior encoder, training data, loss, and parameter budget fixed, which way of injecting <code>d(x)</code> gives the best out-of-distribution quality prediction?</strong>
+          </div>
 
-mkdir -p extern data runs
-git clone https://github.com/miccunifi/ARNIQA.git extern/ARNIQA
-git clone https://github.com/stephencurry-web/IQA.git extern/MP-IQE
-git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch</code></pre>
-      <div class="callout warning">
-        <strong>Как использовать MP-IQE</strong>
-        Возьмите из статьи схему работы с queries, но учтите различие: в MP-IQE scene/distortion prompt banks сами являются queries, а в этом проекте используется отдельный per-image prior <code>d(x)</code>.
-      </div>
-    </section>
+          <div class="two-column">
+            <article class="plain-card">
+              <h3>Compare</h3>
+              <ul class="clean-list">
+                <li>No distortion prior</li>
+                <li>Additive query conditioning</li>
+                <li>FiLM query conditioning</li>
+                <li>Prefix key/value token</li>
+              </ul>
+            </article>
+            <article class="plain-card">
+              <h3>Keep fixed</h3>
+              <ul class="clean-list">
+                <li>Frozen CLIP image encoder</li>
+                <li>Frozen ARNIQA prior encoder</li>
+                <li>Head width and trainable budget</li>
+                <li>Data splits, loss, and optimizer</li>
+              </ul>
+            </article>
+          </div>
 
-    <section class="section container" id="data">
-      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Core, external и stretch</h2></div><p>Core-эксперимент обучается на KADID-10k. CSIQ, TID2013 и LIVE используются только для проверки переноса без подстройки.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Роль</th><th>Датасет</th><th>Что делать</th><th>Ссылка</th></tr></thead>
-          <tbody>
-            <tr><td><span class="status good">Core train/val/test</span></td><td>KADID-10k · 10 125 distorted / 81 reference / 25 types × 5 levels</td><td>Reference-disjoint 70/10/20; общий baseline и 4 conditioning-варианта.</td><td><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official</a></td></tr>
-            <tr><td><span class="status good">External test</span></td><td>CSIQ · 866 distorted / 30 reference / 6 types</td><td>Никакой подстройки. У CSIQ DMOS: меньше означает лучше; инвертируйте один раз в loader.</td><td><a href="https://s2.smu.edu/~eclarson/csiq.html">Author page</a> · <a href="https://qualinet.github.io/databases/image/categorical_image_quality_csiq_database/">files</a></td></tr>
-            <tr><td><span class="status good">External test</span></td><td>TID2013 · 3 000 distorted / 25 reference / 24 types</td><td>Только итоговый cross-dataset тест; MOS выше = лучше.</td><td><a href="https://www.ponomarenko.info/tid2013.htm">Official</a></td></tr>
-            <tr><td><span class="status warn">Optional</span></td><td>LIVE IQA · 779 distorted / 29 reference / 5 types</td><td>Скачать заранее: доступ выдаётся через форму. Не блокируйте core-эксперимент ожиданием пароля.</td><td><a href="https://live.ece.utexas.edu/research/Quality/subjective.htm">Official</a></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="section container" id="protocol">
-      <div class="section-head"><div><p class="eyebrow">Контролируемая матрица</p><h2>Четыре варианта, один prior</h2></div><p>Backbone: frozen CLIP ViT-B/16. Aggregator: один слой cross-attention с 8 learnable queries. Меняется только точка инъекции <code>d(x)</code>.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Механизм</th><th>Определение</th><th>Статус</th></tr></thead>
-          <tbody>
-            <tr><td>V0</td><td>No prior</td><td>Свободные queries <code>Q</code>; обязательная точка отсчёта.</td><td>Обязательно</td></tr>
-            <tr><td>V1</td><td>Additive</td><td><code>Q′ = Q + Wd</code>; один и тот же projected prior добавляется к каждому query.</td><td>Обязательно</td></tr>
-            <tr><td>V2</td><td>FiLM</td><td><code>Q′ = (1 + γ(d)) ⊙ Q + β(d)</code>; последние слои γ/β инициализировать нулями.</td><td>Обязательно</td></tr>
-            <tr><td>V3</td><td>Prefix / K,V token</td><td>Projected <code>d</code> добавляется к patch tokens только как дополнительный key/value.</td><td>Обязательно</td></tr>
-            <tr><td>V4</td><td>Small MoE router</td><td>Эксперты по семействам искажений, мягкое смешивание по <code>d</code>.</td><td>Stretch, только если V0–V3 готовы к дню 6</td></tr>
-            <tr><td>V5/V6</td><td>Hypernetwork / latent dictionary</td><td>Меняют уже не только способ подачи prior; это отдельные исследовательские вопросы.</td><td>Не брать в core</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="grid-2" style="margin-top:18px">
-        <div class="card">
-          <h3>Основной <code>d(x)</code></h3>
-          <p><strong>Frozen ARNIQA representation</strong>: извлеките глобальный feature до финального quality regressor, L2-нормализуйте и спроецируйте в размерность queries. Не обучайте ARNIQA на школьных split.</p>
-          <p><a href="https://github.com/miccunifi/ARNIQA">Код и веса ARNIQA</a></p>
+          <p class="rule"><strong>Blind setting:</strong> the model may use only the image at inference time. Ground-truth distortion labels are not model inputs.</p>
         </div>
-        <div class="card">
-          <h3>Диагностики prior</h3>
-          <p><strong>Oracle text prior</strong> из канонического имени искажения — верхняя граница, не NR-IQA результат. <strong>CLIP-IQA attributes</strong> — optional: это quality/attribute logits, а не чистый тип искажения.</p>
-          <p><a href="https://github.com/IceClear/CLIP-IQA">CLIP-IQA</a></p>
+      </section>
+
+      <section class="brief-section" id="baseline">
+        <div class="section-label"><span>02</span><h2>Baseline</h2></div>
+        <div class="section-content">
+          <div class="status-line">
+            <span>Baseline status</span>
+            <strong>Specified here · implementation pending</strong>
+          </div>
+          <p class="section-intro">There is no ready-made repository for this exact controlled experiment. Implement the no-prior model first. Do not add conditioning until it trains reliably and passes the sanity checks.</p>
+
+          <div class="model-flow" aria-label="Baseline architecture">
+            <div><small>Input</small><strong>Image</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Frozen</small><strong>CLIP patch tokens</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Trainable</small><strong>8-query cross-attention</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Trainable</small><strong>2-layer regressor</strong></div>
+            <span aria-hidden="true">→</span>
+            <div class="accent"><small>Output</small><strong>Quality score</strong></div>
+          </div>
+
+          <div class="spec-grid">
+            <div><span>Checkpoint</span><strong><a href="https://huggingface.co/openai/clip-vit-base-patch16">openai/clip-vit-base-patch16</a></strong></div>
+            <div><span>Training data</span><strong>KADID-10k, 70/10/20 by reference ID</strong></div>
+            <div><span>Loss</span><strong>Smooth L1</strong></div>
+            <div><span>Seeds</span><strong>8, 19, 25</strong></div>
+          </div>
+
+          <h3 class="subheading">Conditioning variants</h3>
+          <div class="variant-grid">
+            <article><span>B0</span><h4>No prior</h4><p>Learnable queries <code>Q</code>. This is the required baseline.</p></article>
+            <article><span>C1</span><h4>Additive</h4><p><code>Q′ = Q + Wd</code></p></article>
+            <article><span>C2</span><h4>FiLM</h4><p><code>Q′ = (1 + γ(d)) ⊙ Q + β(d)</code></p></article>
+            <article><span>C3</span><h4>Prefix K/V</h4><p>Append projected <code>d</code> to the image tokens as one key/value token.</p></article>
+          </div>
+
+          <p class="rule"><strong>Distortion prior:</strong> use the normalized embedding from the frozen <a href="https://github.com/miccunifi/ARNIQA">ARNIQA encoder</a>, before its quality regressor. Project it to the query dimension with one trainable linear layer.</p>
         </div>
-      </div>
+      </section>
 
-      <h3 style="margin-top:30px">Интервенции: проверяем, что prior действительно используется</h3>
-      <div class="grid-3">
-        <div class="card"><h3>Matched</h3><p>Правильный <code>d(x)</code>. Основной результат.</p></div>
-        <div class="card"><h3>Shuffled</h3><p><code>d</code> случайно переставлен внутри batch. Качество должно падать.</p></div>
-        <div class="card"><h3>Zeroed</h3><p><code>d=0</code>. Отделяет полезность prior от лишних параметров.</p></div>
-      </div>
-      <p class="small">Дополнительно: oracle <code>d</code> и deliberately wrong family. Attention-weight на prefix-токене сам по себе не считается объяснением.</p>
-    </section>
-
-    <section class="section container" id="lodo">
-      <div class="section-head"><div><p class="eyebrow">Протокол LODO</p><h2>Разделите два уровня переноса</h2></div><p>ARNIQA видел синтетические искажения при pretraining. Поэтому отдельно оцениваются перенос обучаемой IQA-головы и перенос всей системы.</p></div>
-      <div class="grid-2">
-        <div class="card"><span class="status good">Head-LODO</span><h3>Практичный core</h3><p>Frozen ARNIQA разрешён. Из train IQA-head удаляется одно заранее зафиксированное семейство KADID. Это тест: умеет ли механизм conditioning переносить prior на новый тип для головы.</p></div>
-        <div class="card"><span class="status warn">Strict system-LODO</span><h3>Только как дополнительный тест</h3><p>Ни один обучаемый или pre-trained модуль не должен был видеть held-out искажение. Для ARNIQA это обычно нельзя гарантировать; не называйте Head-LODO строгим system-LODO.</p></div>
-      </div>
-      <div class="callout warning" style="margin-top:18px"><strong>Зафиксируйте до запуска</strong>Используйте семь групп с официальной страницы KADID: blur 01–03, color 04–08, compression 09–10, noise 11–15, brightness 16–18, spatial 19–23, sharpness/contrast 24–25. Для каждого LODO-fold train/val/test остаются reference-disjoint; seeds <code>8, 19, 25</code>. После первого результата mapping не менять.</div>
-    </section>
-
-    <section class="section container" id="metrics">
-      <div class="section-head"><div><p class="eyebrow">Метрики и критерий победы</p><h2>Что попадёт в финальную таблицу</h2></div><p>SRCC — основной показатель. PLCC считать после одной и той же нелинейной калибровки либо честно указывать raw PLCC.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Группа</th><th>Поля</th><th>Как агрегировать</th></tr></thead>
-          <tbody>
-            <tr><td>Accuracy</td><td>SRCC, PLCC, mean и worst-family SRCC</td><td>Среднее ± std по 3 seeds; 95% bootstrap CI для разности с V0.</td></tr>
-            <tr><td>Generalization</td><td>Head-LODO; zero-shot CSIQ/TID2013/LIVE</td><td>Macro-average по датасетам, не по изображениям.</td></tr>
-            <tr><td>Cost</td><td>Trainable params, batch-1 latency, peak VRAM</td><td>Одна GPU, 100 warmup + 500 timed runs, одинаковый input size.</td></tr>
-            <tr><td>Causality</td><td>matched − shuffled; matched − zeroed</td><td>Та же модель и те же изображения.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="callout" style="margin-top:18px"><strong>Заранее заданный успех</strong>Conditioning считается полезным, если лучший вариант даёт не меньше +0.01 macro OOD-SRCC к V0, CI разности не пересекает 0, а shuffled prior заметно ухудшает результат. Если нет — хороший вывод звучит: «при данном backbone и prior механизм инъекции не важен / prior не используется».</div>
-    </section>
-
-    <section class="section container" id="plan">
-      <div class="section-head"><div><p class="eyebrow">План на 10 дней</p><h2>Критический путь</h2></div><p>Каждый день заканчивается артефактом в репозитории, а не только устным статусом.</p></div>
-      <div class="card timeline">
-        <div class="day"><div class="day-label">День 1</div><div><h3>Data contract</h3><p>Manifest, score direction, reference-disjoint split, 30 ручных визуальных проверок.</p></div></div>
-        <div class="day"><div class="day-label">День 2</div><div><h3>Sanity baseline</h3><p>Frozen CLIP pooled feature → MLP и переобучение на 64 samples.</p></div></div>
-        <div class="day"><div class="day-label">Дни 3–4</div><div><h3>Query baseline + prior</h3><p>V0 cross-attention, затем deterministic ARNIQA extractor и cache ключей/версий.</p></div></div>
-        <div class="day"><div class="day-label">Дни 5–6</div><div><h3>V1–V3</h3><p>Additive, FiLM, prefix/KV; один unit test на identity-init для FiLM.</p></div></div>
-        <div class="day"><div class="day-label">День 7</div><div><h3>Interventions</h3><p>Matched, shuffled, zeroed; анализ 20 лучших/худших delta.</p></div></div>
-        <div class="day"><div class="day-label">Дни 8–9</div><div><h3>3 seeds + external</h3><p>Head-LODO и CSIQ/TID2013; LIVE — если доступ уже получен.</p></div></div>
-        <div class="day"><div class="day-label">День 10</div><div><h3>Freeze</h3><p>Таблица, CI, latency, 4–6 страниц, checkpoint и reproduction command.</p></div></div>
-      </div>
-    </section>
-
-    <section class="section container" id="reading">
-      <div class="section-head"><div><p class="eyebrow">Читать в этом порядке</p><h2>Пять работ до первого sweep</h2></div><p>Команда делит статьи: каждый пишет по 5 тезисов «что переносим / чего не переносим».</p></div>
-      <div class="reading-list">
-        <article class="paper"><div class="paper-order">1</div><div><h3>MP-IQE · Multi-Modal Prompt Learning on BIQA</h3><p>Ближайшая архитектура; внимательно прочитать Eq. 12–14 и отличить prompt bank от per-image prior.</p><div class="paper-links"><a href="https://arxiv.org/html/2404.14949v2">Paper</a><a href="https://github.com/stephencurry-web/IQA">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">2</div><div><h3>ARNIQA · Learning Distortion Manifold</h3><p>Источник основного predicted prior и его ограничения на unseen distortions.</p><div class="paper-links"><a href="https://arxiv.org/abs/2310.14918">Paper</a><a href="https://github.com/miccunifi/ARNIQA">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">3</div><div><h3>LIQE · Vision-Language Correspondence</h3><p>Совместное моделирование качества, сцены и типа искажения; сильный conceptual baseline.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zhang_Blind_Image_Quality_Assessment_via_Vision-Language_Correspondence_A_Multitask_Learning_CVPR_2023_paper.pdf">Paper</a><a href="https://github.com/zwx8981/LIQE">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">4</div><div><h3>DR.Experts · Distortion-Aware Experts</h3><p>AAAI 2026: distortion-specific priors + dynamic MoE. Это близкий prior art для stretch-V4.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/37401/41363">Paper</a></div></div></article>
-        <article class="paper"><div class="paper-order">5</div><div><h3>CLIP-IQA</h3><p>Антонимные prompts и visual attributes. Полезно как alternative feature source, но не как готовый distortion-type encoder.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/25353/25125">Paper</a><a href="https://github.com/IceClear/CLIP-IQA">Code</a></div></div></article>
-      </div>
-      <details style="margin-top:14px"><summary>Дополнительные работы для related work</summary><p><a href="https://scholar.pku.edu.cn/ttjiang/publications/adaptive-prompt-learning-blind-image-quality-assessment-multi-modal-mixed">MMP-IQA / Adaptive Prompt Learning (ACM MM 2025)</a> использует instance-conditioned prompt context. Preprint <a href="https://arxiv.org/abs/2606.02002">Distortion-Aware Fusion of Statistical and VLM Features (2026)</a> применяет multiplicative gating. Сопоставьте их постановки с вашим контролируемым сравнением additive, FiLM и prefix.</p></details>
-    </section>
-
-    <section class="section container" id="done">
-      <div class="section-head"><div><p class="eyebrow">Definition of done</p><h2>Чек-лист команды</h2></div><p>Состояние сохраняется только в этом браузере.</p></div>
-      <div class="card">
-        <div class="progress"><span data-progress></span></div><div class="progress-copy" data-progress-copy></div>
-        <div class="checklist" data-checklist>
-          <label class="check"><input type="checkbox"><span>Manifest и reference-disjoint split закоммичены; 30 путей проверены вручную.</span></label>
-          <label class="check"><input type="checkbox"><span>Score direction проверен на визуально хороших/плохих изображениях.</span></label>
-          <label class="check"><input type="checkbox"><span>V0–V3 проходят overfit-64 и имеют сопоставимый trainable budget.</span></label>
-          <label class="check"><input type="checkbox"><span>ARNIQA frozen; версия весов и способ извлечения feature записаны.</span></label>
-          <label class="check"><input type="checkbox"><span>Есть matched / shuffled / zeroed interventions.</span></label>
-          <label class="check"><input type="checkbox"><span>Финальные числа получены на seeds 8, 19, 25 и имеют CI.</span></label>
-          <label class="check"><input type="checkbox"><span>Отдельно подписаны within-KADID, Head-LODO и cross-dataset результаты.</span></label>
-          <label class="check"><input type="checkbox"><span>Одна команда воспроизводит лучшую строку из README с чистого окружения.</span></label>
+      <section class="brief-section" id="start">
+        <div class="section-label"><span>03</span><h2>First steps</h2></div>
+        <div class="section-content">
+          <ol class="steps">
+            <li>
+              <div><span>Step 1</span><h3>Read three papers</h3></div>
+              <div class="resource-list">
+                <a href="https://arxiv.org/abs/2404.14949"><strong>MP-IQE</strong><span>Query-based aggregation and multimodal prompts. Use it for architecture context, not as the baseline implementation.</span></a>
+                <a href="https://arxiv.org/abs/2310.14918"><strong>ARNIQA</strong><span>Why its frozen representation is a reasonable distortion prior.</span></a>
+                <a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zhang_Blind_Image_Quality_Assessment_via_Vision-Language_Correspondence_A_Multitask_Learning_CVPR_2023_paper.pdf"><strong>LIQE</strong><span>Joint quality, scene, and distortion modelling with vision-language features.</span></a>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 2</span><h3>Download the datasets</h3></div>
+              <div class="dataset-list">
+                <div><strong>KADID-10k</strong><span>Train, validation, in-domain test, and distortion-family holdout.</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official download</a></div>
+                <div><strong>CSIQ</strong><span>External synthetic-distortion test only.</span><a href="https://s2.smu.edu/~eclarson/csiq.html">Author page</a></div>
+                <div><strong>TID2013</strong><span>External taxonomy transfer test only.</span><a href="https://www.ponomarenko.info/tid2013.htm">Official download</a></div>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 3</span><h3>Create the starter repository</h3></div>
+              <div>
+                <p>Use one shared pipeline for all variants. The repository should contain the baseline, experiment configs, evaluation code, and a minimal scoring service.</p>
+                <pre><code>src/iqa/data/            # manifests, splits, score normalization
+src/iqa/encoders/        # CLIP and ARNIQA wrappers
+src/iqa/heads/           # baseline and conditioning modules
+src/iqa/evaluation/      # SRCC, PLCC, bootstrap, latency
+configs/                 # one file per experiment
+scripts/train.py
+scripts/evaluate.py
+service/app.py            # POST /score
+tests/</code></pre>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 4</span><h3>Make the baseline trustworthy</h3></div>
+              <div>
+                <ul class="clean-list compact-list">
+                  <li>Build one manifest: <code>path, score, reference_id, distortion_id, severity</code>.</li>
+                  <li>Split by <code>reference_id</code>, never by individual distorted images.</li>
+                  <li>Pass one forward/backward batch.</li>
+                  <li>Overfit 64 images before the first full run.</li>
+                  <li>Freeze CLIP with <code>eval()</code> and <code>requires_grad=False</code>.</li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 5</span><h3>Run the controlled experiment</h3></div>
+              <div><p>Train B0 and C1–C3 with the same configuration. Then run seven distortion-family holdouts on KADID-10k and final zero-shot tests on CSIQ and TID2013. For C1–C3, evaluate the same trained checkpoint with matched, shuffled, and zeroed priors.</p></div>
+            </li>
+          </ol>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="brief-section" id="result">
+        <div class="section-label"><span>04</span><h2>Expected result</h2></div>
+        <div class="section-content">
+          <p class="section-intro">The project is complete when the team can answer whether the prior helps, which injection mechanism is best, and whether the gain survives unseen distortions.</p>
+
+          <div class="deliverable-grid">
+            <article><span>01</span><h3>Reproducible code</h3><p>Versioned manifests and splits, locked dependencies, configs for B0/C1/C2/C3, tests, and one command for the best model.</p></article>
+            <article><span>02</span><h3>Comparison table</h3><p>Mean ± standard deviation over three seeds for KADID, seven family holdouts, CSIQ, and TID2013.</p></article>
+            <article><span>03</span><h3>Prior intervention</h3><p>Matched vs. shuffled vs. zeroed <code>d(x)</code> for every conditioning variant.</p></article>
+            <article><span>04</span><h3>Deployable scorer</h3><p>A minimal <code>POST /score</code> endpoint that returns the scalar score and inference time for the selected model.</p></article>
+          </div>
+
+          <div class="result-rule">
+            <span>Primary decision rule</span>
+            <p>Rank models by mean distortion-family-holdout SRCC. Use external-dataset SRCC, trainable parameters, and batch-1 latency as secondary criteria. A clear negative result is valid if the protocol is reproducible.</p>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer"><div class="container"><span>Проект 1 · Distortion conditioning</span><a href="resources.html">Все датасеты и статьи →</a></div></footer>
-  <script src="assets/app.js"></script>
+  <footer class="site-footer shell">
+    <span>Project 01 · Distortion-Conditioned NR-IQA</span>
+    <a href="project-2.html">Next project →</a>
+  </footer>
 </body>
 </html>
