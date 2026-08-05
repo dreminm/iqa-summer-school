@@ -1,68 +1,64 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Исследовательские проекты летней R&D-школы по оценке качества изображений.">
-  <title>IQA R&D School · Проекты</title>
+  <meta name="description" content="Research projects for the Image Quality R&D School.">
+  <title>Image Quality R&D School</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="home">
-  <main class="landing">
-    <header class="landing-topbar">
-      <a class="landing-wordmark" href="#projects" aria-label="IQA R&D School">
-        <span class="landing-wordmark-mark" aria-hidden="true">IQ</span>
-        <span class="landing-wordmark-copy">
-          <strong>Image Quality</strong>
-          <span>R&amp;D School</span>
-        </span>
+  <header class="site-header">
+    <div class="nav shell">
+      <a class="brand" href="index.html" aria-label="Image Quality R&D School home">
+        <span class="brand-mark" aria-hidden="true">IQ</span>
+        <span class="brand-copy"><strong>Image Quality</strong><small>R&amp;D School</small></span>
       </a>
-      <span class="landing-year">Summer 2026</span>
-    </header>
+      <span class="term">Summer 2026</span>
+    </div>
+  </header>
 
-    <section class="landing-intro" aria-labelledby="page-title">
-      <div class="landing-intro-copy">
-        <p class="landing-kicker">Исследовательские проекты</p>
-        <h1 id="page-title">Оценка качества изображений</h1>
-        <p class="landing-intro-text">Выберите проект и перейдите к материалам для команды.</p>
+  <main class="landing shell">
+    <section class="landing-hero" aria-labelledby="page-title">
+      <div>
+        <p class="kicker">Student research projects</p>
+        <h1 id="page-title">Image quality assessment</h1>
+        <p class="landing-lede">Choose a project. Each guide defines the problem, the baseline to build, the first steps, and the expected result.</p>
       </div>
-
-      <div class="quality-map" aria-hidden="true">
-        <span class="quality-pixel pixel-a"></span>
-        <span class="quality-pixel pixel-b"></span>
-        <span class="quality-pixel pixel-c"></span>
-        <span class="quality-pixel pixel-d"></span>
-        <span class="quality-scanline"></span>
-        <span class="quality-value">IQA</span>
+      <div class="hero-graphic" aria-hidden="true">
+        <span class="graphic-label">IQA</span>
+        <span class="graphic-block one"></span>
+        <span class="graphic-block two"></span>
+        <span class="graphic-block three"></span>
       </div>
     </section>
 
-    <section class="landing-project-grid" id="projects" aria-label="Проекты школы">
-      <a class="landing-project-link blue" href="project-1.html">
-        <span class="landing-project-number">01</span>
-        <span class="landing-project-content">
-          <span class="landing-project-label">NR-IQA · DISTORTION PRIOR</span>
-          <strong>Conditioning NR-IQA на distortion prior</strong>
-          <span class="landing-project-description">Как внедрять информацию об искажении в blind-метрику качества изображений.</span>
+    <section class="project-grid" aria-label="Research projects">
+      <a class="project-link" href="project-1.html">
+        <span class="project-number">01</span>
+        <span class="project-copy">
+          <span class="project-type">NR-IQA · DISTORTION PRIOR</span>
+          <strong>Distortion-Conditioned NR-IQA</strong>
+          <span>Test whether a predicted distortion representation improves a fixed quality head, and determine how it should be injected.</span>
         </span>
-        <span class="landing-project-arrow" aria-hidden="true">↗</span>
+        <span class="project-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <a class="landing-project-link yellow" href="project-2.html">
-        <span class="landing-project-number">02</span>
-        <span class="landing-project-content">
-          <span class="landing-project-label">CLIP-BASED · PARETO IQA</span>
-          <strong>Парето-оптимальная IQA-метрика для CLIP-based архитектур</strong>
-          <span class="landing-project-description">Как выжать максимум из отобранных энкодеров и выбрать лучший компромисс качества и эффективности.</span>
+      <a class="project-link yellow" href="project-2.html">
+        <span class="project-number">02</span>
+        <span class="project-copy">
+          <span class="project-type">CLIP-BASED · QUALITY × EFFICIENCY</span>
+          <strong>Pareto-Optimal IQA for CLIP-Based Architectures</strong>
+          <span>Find the best out-of-distribution quality and inference-cost trade-off across a fixed shortlist of encoders and lightweight heads.</span>
         </span>
-        <span class="landing-project-arrow" aria-hidden="true">↗</span>
+        <span class="project-arrow" aria-hidden="true">↗</span>
       </a>
     </section>
-
-    <footer class="landing-footer">
-      <span>Летняя R&amp;D-школа</span>
-      <span>Image / Video Quality Assessment</span>
-    </footer>
   </main>
+
+  <footer class="landing-footer shell">
+    <span>Image Quality R&amp;D School</span>
+    <span>Two projects · one reproducible protocol</span>
+  </footer>
 </body>
 </html>
