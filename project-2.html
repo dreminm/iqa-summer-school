@@ -1,225 +1,201 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Инструкция проекта: разработка Парето-оптимальной IQA-метрики для CLIP-based архитектур.">
-  <title>Проект 2 · Парето-оптимальная IQA-метрика</title>
+  <meta name="description" content="Student guide for the Pareto-Optimal IQA for CLIP-Based Architectures research project.">
+  <title>Project 02 · Pareto-Optimal IQA for CLIP-Based Architectures</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="project-2">
   <header class="site-header">
-    <nav class="nav container" aria-label="Основная навигация">
-      <a class="brand" href="index.html">IQA <span>R&D School</span></a>
-      <div class="nav-links">
-        <a href="index.html">Главная</a>
-        <a href="project-1.html">Проект 1</a>
-        <a aria-current="page" href="project-2.html">Проект 2</a>
-        <a href="resources.html">Ресурсы</a>
-      </div>
-    </nav>
+    <div class="nav shell">
+      <a class="brand" href="index.html" aria-label="Image Quality R&D School home">
+        <span class="brand-mark" aria-hidden="true">IQ</span>
+        <span class="brand-copy"><strong>Image Quality</strong><small>R&amp;D School</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="project-1.html">Project 01</a>
+        <a href="project-2.html" aria-current="page">Project 02</a>
+      </nav>
+    </div>
   </header>
 
   <main>
-    <section class="hero project-hero container">
-      <p class="eyebrow">Проект 2 · CLIP-based encoders · Pareto IQA</p>
-      <h1>Парето-оптимальная IQA-метрика для CLIP-based архитектур</h1>
-      <p class="lede">Дан шортлист энкодеров, прошедших train-free screening. Нужно сравнить архитектуры IQA-голов и выбрать решения на Pareto-фронте OOD-качества и вычислительной стоимости.</p>
-      <div class="hero-actions"><a class="button" href="#start">Начать за 60 минут</a><a class="button secondary" href="#heads">Пять голов</a></div>
+    <section class="project-hero shell">
+      <p class="kicker">Project 02 · CLIP-based IQA</p>
+      <h1>Pareto-Optimal IQA for CLIP-Based Architectures</h1>
+      <p class="hero-question">Given a fixed shortlist of pretrained image encoders, which encoder and lightweight head provide the best out-of-distribution quality–latency trade-off?</p>
+      <dl class="project-facts">
+        <div><dt>Core encoders</dt><dd>CLIP + SigLIP 2</dd></div>
+        <div><dt>Training mode</dt><dd>Frozen encoders</dd></div>
+        <div><dt>Primary metric</dt><dd>Macro OOD SRCC</dd></div>
+        <div><dt>Final artifact</dt><dd>Pareto frontier</dd></div>
+      </dl>
     </section>
 
-    <section class="section compact container">
-      <div class="callout">
-        <strong>Научный вопрос в одном предложении</strong>
-        Какая IQA-голова даёт лучший компромисс macro OOD-SRCC × end-to-end latency × trainable parameters для отобранных CLIP-based энкодеров, и сохраняется ли ranking голов при расширении шортлиста?
-      </div>
-    </section>
-
-    <nav class="project-toc container" aria-label="Содержание проекта">
-      <a href="#baseline"><span>01</span>Baseline</a>
-      <a href="#start"><span>02</span>Старт</a>
-      <a href="#models"><span>03</span>Модели</a>
-      <a href="#data"><span>04</span>Данные</a>
-      <a href="#heads"><span>05</span>Головы</a>
-      <a href="#protocol"><span>06</span>Протокол</a>
-      <a href="#pareto"><span>07</span>Pareto</a>
-      <a href="#plan"><span>08</span>План</a>
-      <a href="#reading"><span>09</span>Статьи</a>
-      <a href="#done"><span>10</span>Готовность</a>
+    <nav class="section-nav shell" aria-label="Project sections">
+      <a href="#problem">Problem</a>
+      <a href="#baseline">Baseline</a>
+      <a href="#start">First steps</a>
+      <a href="#result">Expected result</a>
     </nav>
 
-    <section class="section container" id="baseline">
-      <div class="section-head"><div><p class="eyebrow">Исходная точка</p><h2>Baseline и исследуемая гипотеза</h2></div><p>WACV 2026 задаёт сильный baseline для pooled features. В проекте сравниваются головы, которые извлекают quality signal из pooled, patch- и intermediate-layer features полностью frozen CLIP-based энкодеров.</p></div>
-      <div class="grid-2">
-        <article class="card"><span class="status warn">Обязательный baseline</span><h3>Backbone + финальный MLP</h3><p>В схеме LoRA + трёхслойный MLP SigLIP 2 показал сильный результат, а gated activation заметно повлияла на качество. В школьной матрице этот результат представлен сопоставимой MLP-головой над frozen features.</p><p><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a> · <a href="https://github.com/drkkgy/NR_IQA_AGM">Official code</a></p></article>
-        <article class="card"><span class="status good">Исследуем в проекте</span><h3>Patch и intermediate tokens</h3><p>Сравните пространственную и межслойную агрегацию при полностью frozen backbone и mixed-dataset train.</p></article>
-      </div>
-    </section>
+    <div class="brief shell">
+      <section class="brief-section" id="problem">
+        <div class="section-label"><span>01</span><h2>Problem</h2></div>
+        <div class="section-content">
+          <p class="section-intro">A more accurate IQA model is not automatically a better metric: the encoder may be too slow, too large, or too expensive for production. This project searches for non-dominated encoder/head pairs under one fixed training and evaluation protocol.</p>
 
-    <section class="section container" id="start">
-      <div class="section-head"><div><p class="eyebrow">Первые 60 минут</p><h2>Поднять baseline, не весь sweep</h2></div><p>Сначала один encoder, один датасет и 256 изображений. Полная матрица запускается после data audit и overfit-test.</p></div>
-      <div class="steps">
-        <article class="step"><h3>Создайте окружение</h3><p>PyTorch ставьте по официальному CUDA-селектору. Затем установите Transformers, pyiqa и зависимости.</p></article>
-        <article class="step"><h3>Скачайте KADID-10k</h3><p>Соберите loader и добейтесь overfit на 64 изображениях с <code>openai/clip-vit-large-patch14-336</code> и простой linear head.</p></article>
-        <article class="step"><h3>Добавьте KonIQ-10k и SPAQ</h3><p>Только после визуального аудита score direction и проверки, что dataset ID не попадает в тестовый batch.</p></article>
-        <article class="step"><h3>Реализуйте общий feature API</h3><p><code>{pooled, last_tokens, layer_tokens}</code>. Каждая голова получает только объявленные features; backbone остаётся в <code>eval()</code> и <code>requires_grad=False</code>.</p></article>
-      </div>
-      <pre><code>python -m venv .venv
-source .venv/bin/activate
-# Сначала установите torch/torchvision под вашу CUDA с pytorch.org
-pip install transformers accelerate pandas scipy scikit-learn openpyxl \
-  einops timm pyiqa wandb fvcore
+          <div class="research-question">
+            <span>Research question</span>
+            <strong>How much OOD quality can be extracted from each selected encoder, and which model pairs remain on the Pareto frontier when latency, memory, and trainable parameters are included?</strong>
+          </div>
 
-mkdir -p extern data runs
-git clone https://github.com/drkkgy/NR_IQA_AGM.git extern/NR_IQA_AGM
-git clone https://github.com/chaofengc/IQA-PyTorch.git extern/IQA-PyTorch
-git clone https://github.com/narthchin/DEIQT.git extern/DEIQT</code></pre>
-    </section>
+          <div class="two-column">
+            <article class="plain-card">
+              <h3>Core encoder shortlist</h3>
+              <ul class="clean-list">
+                <li><a href="https://huggingface.co/openai/clip-vit-large-patch14-336">CLIP ViT-L/14 @ 336</a></li>
+                <li><a href="https://huggingface.co/google/siglip2-so400m-patch16-384">SigLIP 2 So400m @ 384</a></li>
+              </ul>
+            </article>
+            <article class="plain-card">
+              <h3>Optional efficiency extension</h3>
+              <p><a href="https://github.com/apple/ml-fastvlm">FastViTHD from FastVLM</a>. Add it only after the core pipeline is complete and it can return pooled and patch features through the same encoder API.</p>
+            </article>
+          </div>
 
-    <section class="section container" id="models">
-      <div class="section-head"><div><p class="eyebrow">Модели</p><h2>Отобранные энкодеры и расширение шортлиста</h2></div><p>Core-протокол начинается с двух отобранных CLIP-based энкодеров. Дополнительные энкодеры подключаются после фиксации голов и правил сравнения.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Checkpoint</th><th>Зачем</th><th>Ограничение</th></tr></thead>
-          <tbody>
-            <tr><td>E1</td><td><a href="https://huggingface.co/openai/clip-vit-large-patch14-336"><code>openai/clip-vit-large-patch14-336</code></a></td><td>Исходный shortlist; 24×24 patch grid + class token.</td><td>Старая contrastive pretraining recipe; неизменный input 336.</td></tr>
-            <tr><td>E2</td><td><a href="https://huggingface.co/google/siglip2-so400m-patch16-384"><code>google/siglip2-so400m-patch16-384</code></a></td><td>Актуальный SigLIP 2; более плотные признаки при приемлемом 24 GB бюджете.</td><td>Большой encoder; начинайте с batch 2 и gradient accumulation.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="callout" style="margin-top:18px"><strong>Расширение шортлиста</strong>После core-матрицы можно добавить FastViT-HD или другой encoder, прошедший screening. Для честного сравнения он должен работать через тот же feature API; данные, головы и budget остаются неизменными, а latency и VRAM измеряются end-to-end при его нативном input resolution.</div>
-      <div class="callout warning" style="margin-top:18px"><strong>Условия сопоставления с WACV 2026</strong>В статье используется <code>google/siglip2-so400m-patch16-512</code> и LoRA. Основная матрица проекта использует frozen-384, поэтому результаты следует маркировать как отдельный протокол. Официальный checkpoint можно запустить один раз как внешний sanity check.</div>
-    </section>
-
-    <section class="section container" id="data">
-      <div class="section-head"><div><p class="eyebrow">Данные</p><h2>Три train + четыре core held-out</h2></div><p>Обучение идёт на объединении KADID-10k, KonIQ-10k и SPAQ. Четыре held-out базы используются только для финальной OOD-оценки.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Роль</th><th>Датасет</th><th>Score</th><th>Ссылка</th></tr></thead>
-          <tbody>
-            <tr><td><span class="status good">Train</span></td><td>KADID-10k · synthetic · 10 125</td><td>Несмотря на имя DMOS, официальный score растёт с качеством: <code>(dmos−1)/4</code>.</td><td><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official</a></td></tr>
-            <tr><td><span class="status good">Train</span></td><td>KonIQ-10k · authentic · 10 073</td><td>MOS higher = better; нормировать в [0,1].</td><td><a href="https://darus.uni-stuttgart.de/dataset.xhtml?persistentId=doi%3A10.18419%2Fdarus-2435">Official DOI</a></td></tr>
-            <tr><td><span class="status good">Train</span></td><td>SPAQ · smartphone · 11 125</td><td>MOS higher = better; использовать overall MOS.</td><td><a href="https://github.com/h4nwei/SPAQ">Official</a></td></tr>
-            <tr><td><span class="status good">OOD test</span></td><td>LIVE Challenge / CLIVE · authentic · 1 162</td><td>MOS higher = better.</td><td><a href="https://live.ece.utexas.edu/research/ChallengeDB/">Official · form</a></td></tr>
-            <tr><td><span class="status good">OOD test</span></td><td>CSIQ · synthetic · 866</td><td>DMOS lower = better; инвертировать в loader.</td><td><a href="https://s2.smu.edu/~eclarson/csiq.html">Author page</a> · <a href="https://qualinet.github.io/databases/image/categorical_image_quality_csiq_database/">files</a></td></tr>
-            <tr><td><span class="status good">OOD test</span></td><td>TID2013 · synthetic · 3 000</td><td>MOS higher = better.</td><td><a href="https://www.ponomarenko.info/tid2013.htm">Official</a></td></tr>
-            <tr><td><span class="status good">OOD test</span></td><td>AGIQA-3K · generated · 2 982</td><td>Брать quality MOS, не alignment.</td><td><a href="https://github.com/lcysyzxdxc/AGIQA-3k-Database">Official</a> · <a href="https://huggingface.co/datasets/strawhat/agiqa-3k">convenience copy</a></td></tr>
-            <tr><td><span class="status warn">Stretch</span></td><td>PIPAL · restoration · 29k</td><td>FR database; для NR-стресса брать distorted image и released training Elo score, без claims прямой сопоставимости.</td><td><a href="https://github.com/HaomingCai/PIPAL-dataset">Official</a></td></tr>
-            <tr><td><span class="status stop">Не в core</span></td><td>PieAPP · pairwise FR</td><td>Pairwise labels и reference images требуют другой задачи/метрики.</td><td><a href="https://github.com/prashnani/PerceptualImageError">Official</a></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="section container" id="heads">
-      <div class="section-head"><div><p class="eyebrow">Архитектуры</p><h2>Пять исследовательских голов + sanity</h2></div><p>Loss, crop policy, optimizer и budget одинаковы. Для сложной головы нельзя незаметно добавить LoRA или более высокое разрешение.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Голова</th><th>Вход</th><th>Проверяемая гипотеза</th></tr></thead>
-          <tbody>
-            <tr><td>S</td><td>Linear sanity probe</td><td>Pooled/CLS</td><td>Loader и target работают; не участник SOTA-гонки.</td></tr>
-            <tr><td>H0</td><td>3-layer ReLU MLP</td><td>Pooled/CLS</td><td>Стандартная дешёвая точка отсчёта.</td></tr>
-            <tr><td>H1</td><td>AGM gated MLP</td><td>Pooled/CLS</td><td>Сильная ближайшая baseline: важна ли адаптивная активация?</td></tr>
-            <tr><td>H2</td><td>Single-query cross-attention</td><td>Last-layer patch tokens</td><td>Нужен ли learned quality query для spatial selection?</td></tr>
-            <tr><td>H3</td><td>Patch score × patch weight</td><td>Last-layer patch tokens</td><td>Помогает ли явная локальная оценка и importance pooling?</td></tr>
-            <tr><td>H4</td><td>4-layer gated fusion + query pooling</td><td>4 равномерно выбранных слоя</td><td>Добавляют ли low/mid-level features информацию о локальных искажениях?</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="grid-2" style="margin-top:18px">
-        <div class="card"><h3>Budget rule</h3><p>Основная таблица: не более 2M trainable parameters на голову. Если H4 не помещается — уменьшите hidden width, а не расширяйте бюджет только ему.</p></div>
-        <div class="card"><h3>Shared forward</h3><p>За один frozen encoder forward получите features и передайте всем головам. Loss суммируется; оптимизаторы независимы. Это сокращает encoder compute примерно в число голов.</p></div>
-      </div>
-      <div class="callout warning" style="margin-top:18px"><strong>Не кэшируйте четыре слоя без расчёта</strong>Для CLIP L/14@336 один last-layer tensor — примерно 577×1024 значений на image. В fp16 это около 1.18 MB/image; четыре слоя для 31k train images — порядка 146 GB до metadata. Предпочтителен online shared-forward; cache только pooled features и, при необходимости, последний слой.</div>
-    </section>
-
-    <section class="section container" id="protocol">
-      <div class="section-head"><div><p class="eyebrow">Единый train protocol</p><h2>Что нельзя менять между головами</h2></div><p>Иначе comparison превращается в набор отдельных моделей, где непонятно, что именно дало выигрыш.</p></div>
-      <div class="grid-2">
-        <div class="card">
-          <h3>Data и target</h3>
-          <ul>
-            <li>Все scores перевести в [0,1], higher = better.</li>
-            <li>Сначала reproducible concat sampler как у Q-Align mixed training.</li>
-            <li>Dataset-balanced sampler — отдельная ablation только для H0 и лучшей головы.</li>
-            <li>Split synthetic datasets по reference/content ID.</li>
-          </ul>
+          <p class="rule"><strong>Scope:</strong> CLIP-based encoders are the core study. FastViTHD is an optional extension, not a replacement for the core comparison.</p>
         </div>
-        <div class="card">
-          <h3>Optimization</h3>
-          <ul>
-            <li><code>SmoothL1 + λ·pairwise ranking</code>, один λ для всех.</li>
-            <li>AMP, gradient clipping, early stop только по mixed validation macro-SRCC.</li>
-            <li>Seeds <code>8, 19, 25</code>.</li>
-            <li>Backbone всегда <code>eval()</code>, gradients отключены.</li>
-          </ul>
+      </section>
+
+      <section class="brief-section" id="baseline">
+        <div class="section-label"><span>02</span><h2>Baseline</h2></div>
+        <div class="section-content">
+          <div class="status-line">
+            <span>Baseline status</span>
+            <strong>Unified protocol to implement</strong>
+          </div>
+          <p class="section-intro">Published code covers related models, but there is no ready-made baseline for this exact encoder shortlist, frozen-encoder policy, dataset mix, and efficiency measurement. Build one common baseline before comparing richer heads.</p>
+
+          <div class="model-flow" aria-label="Baseline architecture">
+            <div><small>Input</small><strong>Image</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Frozen</small><strong>Selected encoder</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Feature</small><strong>Pooled embedding</strong></div>
+            <span aria-hidden="true">→</span>
+            <div><small>Trainable</small><strong>Gated MLP</strong></div>
+            <span aria-hidden="true">→</span>
+            <div class="accent"><small>Output</small><strong>Quality score</strong></div>
+          </div>
+
+          <div class="spec-grid">
+            <div><span>Head</span><strong>LayerNorm → gated MLP → scalar</strong></div>
+            <div><span>Budget</span><strong>≤ 2M trainable parameters</strong></div>
+            <div><span>Loss</span><strong>Smooth L1, identical for every head</strong></div>
+            <div><span>Target</span><strong>[0, 1], higher means better</strong></div>
+          </div>
+
+          <p class="rule"><strong>Implementation reference:</strong> adapt the gated head from the official <a href="https://github.com/drkkgy/NR_IQA_AGM">NR_IQA_AGM repository</a>, but keep the encoder fully frozen and route it through the common adapter used by every experiment.</p>
+
+          <h3 class="subheading">Head shortlist</h3>
+          <div class="variant-grid">
+            <article><span>S0</span><h4>Linear probe</h4><p>Pooled feature. Data-pipeline sanity check only.</p></article>
+            <article><span>H0</span><h4>Gated MLP</h4><p>Pooled feature. Required baseline.</p></article>
+            <article><span>H1</span><h4>Query pooling</h4><p>One learned query over final-layer patch tokens.</p></article>
+            <article><span>H2</span><h4>Weighted patches</h4><p>Predict a score and an importance weight for every patch.</p></article>
+          </div>
+
+          <p class="rule"><strong>Pareto axes:</strong> maximize macro OOD SRCC; minimize end-to-end batch-1 latency, peak inference VRAM, and trainable parameters. Use the same GPU, precision, and encoder-native input size for every measurement.</p>
         </div>
-      </div>
-      <div class="callout danger" style="margin-top:18px"><strong>Запрещённая утечка</strong>Не используйте OOD test для выбора epoch, head width, layer indices или loss. Даже однократный «посмотрели и поправили» превращает held-out в validation.</div>
-    </section>
+      </section>
 
-    <section class="section container" id="pareto">
-      <div class="section-head"><div><p class="eyebrow">Pareto</p><h2>Оси зафиксировать до запуска</h2></div><p>«Pareto-optimal» имеет смысл только с заранее определёнными осями и процедурой измерения.</p></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Ось</th><th>Определение</th><th>Правило</th></tr></thead>
-          <tbody>
-            <tr><td>Quality ↑</td><td>Macro mean SRCC на CLIVE, CSIQ, TID2013, AGIQA-3K</td><td>Каждая база имеет одинаковый вес.</td></tr>
-            <tr><td>Robustness ↑</td><td>Worst-dataset SRCC</td><td>Tie-break между близкими macro mean.</td></tr>
-            <tr><td>Latency ↓</td><td>End-to-end batch-1, включая frozen encoder</td><td>Одна GPU; 100 warmup + 500 repeats; p50 и p95.</td></tr>
-            <tr><td>Head cost ↓</td><td>Trainable params и head-only FLOPs</td><td>Отдельно от total encoder FLOPs.</td></tr>
-            <tr><td>Memory ↓</td><td>Peak inference VRAM</td><td>Одинаковая precision и input size.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="callout" style="margin-top:18px"><strong>Заранее заданный успех</strong>Сложная агрегация оправдана, если улучшает macro OOD-SRCC не меньше чем на +0.01 к H1, выигрывает минимум на 3 из 4 held-out баз и остаётся ≤2M trainable params. Иначе практический победитель — H1, и это ценный отрицательный результат.</div>
-    </section>
-
-    <section class="section container" id="plan">
-      <div class="section-head"><div><p class="eyebrow">План на 10 дней</p><h2>Сначала один encoder, потом перенос</h2></div><p>Полная сетка запускается каскадом: слабые головы на E1 не получают автоматически дорогой E2 sweep.</p></div>
-      <div class="card timeline">
-        <div class="day"><div class="day-label">День 1</div><div><h3>Data audit</h3><p>Manifest, score direction, split policy, 30 визуальных samples на базу.</p></div></div>
-        <div class="day"><div class="day-label">День 2</div><div><h3>Linear + H0</h3><p>Overfit-64 и полный KADID smoke-run на CLIP.</p></div></div>
-        <div class="day"><div class="day-label">День 3</div><div><h3>H1</h3><p>Перенести gated MLP из WACV-style baseline; проверить число параметров.</p></div></div>
-        <div class="day"><div class="day-label">Дни 4–5</div><div><h3>H2–H4</h3><p>Query pooling, patch weighting, multi-layer fusion; unit tests на shapes/masks.</p></div></div>
-        <div class="day"><div class="day-label">День 6</div><div><h3>CLIP tournament</h3><p>Один seed на всех головах; оставить H1 + две лучшие сложные.</p></div></div>
-        <div class="day"><div class="day-label">Дни 7–8</div><div><h3>SigLIP 2 transfer</h3><p>Те же головы, budget и loss. Изменяется только adapter размерности входа.</p></div></div>
-        <div class="day"><div class="day-label">День 9</div><div><h3>3 seeds + OOD</h3><p>Финальные H1 + топ-2 головы; все четыре held-out базы.</p></div></div>
-        <div class="day"><div class="day-label">День 10</div><div><h3>Pareto + freeze</h3><p>Latency/VRAM, bootstrap CI, вывод о переносе между encoders, reproduction command.</p></div></div>
-      </div>
-    </section>
-
-    <section class="section container" id="reading">
-      <div class="section-head"><div><p class="eyebrow">Читать в этом порядке</p><h2>Шесть работ, из них четыре обязательные</h2></div><p>Для каждой архитектуры команда формулирует минимальную версию, которую можно честно сравнить при ≤2M параметров.</p></div>
-      <div class="reading-list">
-        <article class="paper"><div class="paper-order">1</div><div><h3>Revisiting Vision–Language Foundations for NR-IQA · WACV 2026</h3><p>Главный baseline: сравнение backbone, активаций и официальный код AGM-головы.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/WACV2026/papers/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.pdf">Paper</a><a href="https://github.com/drkkgy/NR_IQA_AGM">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">2</div><div><h3>DEIQT · Attention-Panel Decoder</h3><p>Quality queries и cross-attention над ViT tokens; прототип для H2.</p><div class="paper-links"><a href="https://ojs.aaai.org/index.php/AAAI/article/view/25302">Paper</a><a href="https://github.com/narthchin/DEIQT">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">3</div><div><h3>WaDIQaM · Patch score and weight</h3><p>Классическая явная агрегация локальных quality scores и importance weights; прототип H3.</p><div class="paper-links"><a href="https://arxiv.org/abs/1612.01697">Paper</a><a href="https://github.com/ma3252788/Deep-Neural-Networks-for-No-Reference-and-Full-Reference-Image-Quality-Assessment">Reference code</a></div></div></article>
-        <article class="paper"><div class="paper-order">4</div><div><h3>TOPIQ · Top-down Semantics to Distortions</h3><p>Мотивация для межслойной fusion: high-level semantics направляет low-level distortion features.</p><div class="paper-links"><a href="https://arxiv.org/abs/2308.03060">Paper</a><a href="https://github.com/chaofengc/IQA-PyTorch">Code in pyiqa</a></div></div></article>
-        <article class="paper"><div class="paper-order">5</div><div><h3>MANIQA</h3><p>Multi-dimension attention и weighted pooling над ViT features. Читать как альтернативу H3/H4, не копировать целиком.</p><div class="paper-links"><a href="https://openaccess.thecvf.com/content/CVPR2022W/NTIRE/papers/Yang_MANIQA_Multi-Dimension_Attention_Network_for_No-Reference_Image_Quality_Assessment_CVPRW_2022_paper.pdf">Paper</a><a href="https://github.com/IIGROUP/MANIQA">Code</a></div></div></article>
-        <article class="paper"><div class="paper-order">6</div><div><h3>Q-Align · Discrete Text-Defined Levels</h3><p>Пример mixed-data training и альтернативной постановки IQA через дискретные текстовые уровни.</p><div class="paper-links"><a href="https://proceedings.mlr.press/v235/wu24ah.html">Paper</a><a href="https://github.com/Q-Future/Q-Align">Code</a></div></div></article>
-      </div>
-    </section>
-
-    <section class="section container" id="done">
-      <div class="section-head"><div><p class="eyebrow">Definition of done</p><h2>Чек-лист команды</h2></div><p>Состояние сохраняется только в этом браузере.</p></div>
-      <div class="card">
-        <div class="progress"><span data-progress></span></div><div class="progress-copy" data-progress-copy></div>
-        <div class="checklist" data-checklist>
-          <label class="check"><input type="checkbox"><span>Три train manifest и четыре OOD manifest имеют единый schema и проверенную score direction.</span></label>
-          <label class="check"><input type="checkbox"><span>Frozen означает <code>eval()</code>, <code>requires_grad=False</code> и отсутствие LoRA во всех core runs.</span></label>
-          <label class="check"><input type="checkbox"><span>Linear sanity, H0 и H1 воспроизводятся на CLIP; overfit-64 пройден.</span></label>
-          <label class="check"><input type="checkbox"><span>H2–H4 используют общий feature API и ≤2M trainable params.</span></label>
-          <label class="check"><input type="checkbox"><span>Полный SigLIP 2 sweep запускается только для H1 + топ-2 CLIP heads.</span></label>
-          <label class="check"><input type="checkbox"><span>OOD test не использовался для выбора epoch или hyperparameters.</span></label>
-          <label class="check"><input type="checkbox"><span>Финальные модели имеют seeds 8, 19, 25, bootstrap CI, latency p50/p95 и peak VRAM.</span></label>
-          <label class="check"><input type="checkbox"><span>Pareto-фронт и вывод «переносится ли head ranking между encoders» записаны до обсуждения SOTA.</span></label>
+      <section class="brief-section" id="start">
+        <div class="section-label"><span>03</span><h2>First steps</h2></div>
+        <div class="section-content">
+          <ol class="steps">
+            <li>
+              <div><span>Step 1</span><h3>Read the baseline papers</h3></div>
+              <div class="resource-list">
+                <a href="https://openaccess.thecvf.com/content/WACV2026/html/Yadav_Revisiting_Vision-Language_Foundations_for_No-Reference_Image_Quality_Assessment_WACV_2026_paper.html"><strong>Revisiting Vision–Language Foundations for NR-IQA</strong><span>Start here: encoder comparison, activation study, and the closest published baseline.</span></a>
+                <a href="https://ojs.aaai.org/index.php/AAAI/article/view/25302"><strong>DEIQT</strong><span>Quality-query aggregation over transformer features; architecture reference for H1.</span></a>
+                <a href="https://arxiv.org/abs/1612.01697"><strong>WaDIQaM</strong><span>Local quality prediction and learned importance pooling; architecture reference for H2.</span></a>
+                <a href="https://arxiv.org/abs/2412.13303"><strong>FastVLM</strong><span>Read only if the team adds FastViTHD after completing the core matrix.</span></a>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 2</span><h3>Download the datasets</h3></div>
+              <div class="dataset-list">
+                <div><strong>KADID-10k</strong><span>Train · synthetic distortions</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official download</a></div>
+                <div><strong>KonIQ-10k</strong><span>Train · authentic distortions</span><a href="https://database.mmsp-kn.de/koniq-10k-database.html">Official download</a></div>
+                <div><strong>SPAQ</strong><span>Train · smartphone photography</span><a href="https://github.com/h4nwei/SPAQ">Official repository</a></div>
+                <div><strong>CLIVE</strong><span>Final OOD test · authentic</span><a href="https://live.ece.utexas.edu/research/ChallengeDB/">Official page</a></div>
+                <div><strong>CSIQ + TID2013</strong><span>Final OOD test · synthetic</span><span class="inline-links"><a href="https://s2.smu.edu/~eclarson/csiq.html">CSIQ</a><a href="https://www.ponomarenko.info/tid2013.htm">TID2013</a></span></div>
+                <div><strong>AGIQA-3K</strong><span>Final OOD test · generated images</span><a href="https://github.com/lcysyzxdxc/AGIQA-3k-Database">Official repository</a></div>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 3</span><h3>Create the benchmark repository</h3></div>
+              <div>
+                <p>Every encoder must expose the same feature contract. Every head must use the same trainer and evaluator.</p>
+                <pre><code>src/iqa/data/            # manifests, splits, balanced sampler
+src/iqa/encoders/        # one EncoderAdapter per backbone
+src/iqa/heads/           # S0, H0, H1, H2
+src/iqa/evaluation/      # SRCC, latency, VRAM, Pareto export
+configs/                 # encoder × head experiments
+scripts/train.py
+scripts/benchmark.py
+service/app.py            # POST /score
+tests/</code></pre>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 4</span><h3>Prove one path end to end</h3></div>
+              <div>
+                <ul class="clean-list compact-list">
+                  <li>Normalize every score to <code>[0, 1]</code>, higher means better.</li>
+                  <li>Use content/reference-disjoint splits where reference IDs exist.</li>
+                  <li>Overfit 64 images with CLIP + S0, then CLIP + H0.</li>
+                  <li>Run one complete CLIP + H0 experiment before adding another head or encoder.</li>
+                  <li>Never use an OOD test dataset for model selection.</li>
+                </ul>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 5</span><h3>Build the Pareto matrix</h3></div>
+              <div><p>Run S0/H0/H1/H2 on CLIP first. Keep H0 and the two strongest heads for SigLIP 2. Measure quality and inference cost with one benchmark script. Add FastViTHD only if the core results are complete.</p></div>
+            </li>
+          </ol>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="brief-section" id="result">
+        <div class="section-label"><span>04</span><h2>Expected result</h2></div>
+        <div class="section-content">
+          <p class="section-intro">The project is complete when the team can show which encoder/head pairs are non-dominated and recommend a model for at least two operating points: maximum quality and low latency.</p>
+
+          <div class="deliverable-grid">
+            <article><span>01</span><h3>Unified benchmark</h3><p>One feature API, one trainer, one evaluator, fixed manifests, and reproducible configs for every completed encoder/head pair.</p></article>
+            <article><span>02</span><h3>Results matrix</h3><p>Three-seed OOD SRCC by dataset, macro SRCC, worst-dataset SRCC, parameters, latency p50/p95, and peak VRAM.</p></article>
+            <article><span>03</span><h3>Pareto plot</h3><p>Macro OOD SRCC versus batch-1 latency, with encoder, head, parameter count, and VRAM encoded in the exported table.</p></article>
+            <article><span>04</span><h3>Deployable scorer</h3><p>A minimal <code>POST /score</code> endpoint for the selected quality-first and speed-first configurations.</p></article>
+          </div>
+
+          <div class="result-rule">
+            <span>Primary decision rule</span>
+            <p>A model is Pareto-optimal if no tested model is both more accurate on macro OOD SRCC and cheaper on end-to-end latency. Report the full frontier; do not force a single winner.</p>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
-  <footer class="footer"><div class="container"><span>Проект 2 · Парето-оптимальная IQA-метрика</span><a href="resources.html">Все датасеты и статьи →</a></div></footer>
-  <script src="assets/app.js"></script>
+  <footer class="site-footer shell">
+    <span>Project 02 · Pareto-Optimal IQA</span>
+    <a href="project-1.html">← Previous project</a>
+  </footer>
 </body>
 </html>
