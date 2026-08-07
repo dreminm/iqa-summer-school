@@ -5,7 +5,7 @@ A static GitHub Pages site for two student research projects in no-reference ima
 ## Pages
 
 - `index.html` — project selection
-- `project-1.html` — Distortion-Conditioned NR-IQA
+- `project-1.html` — Criterion-Conditioned Quality Readout
 - `project-2.html` — Pareto-Optimal IQA for CLIP-Based Architectures
 - `resources.html` — compatibility page that routes readers to the project guides
 - `assets/styles.css` — shared visual system

@@ -150,6 +150,22 @@ body[data-page="project-2"] .project-hero::after { border: 50px solid var(--yell
 .variant-grid h4 { margin: 8px 0 7px; font-size: 1.02rem; }
 .variant-grid p { margin: 0; color: var(--muted); font-size: .9rem; }
 
+.hypothesis-list { display: grid; gap: 10px; }
+.hypothesis-list article { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 18px; border: 1px solid var(--line); background: var(--paper); padding: 18px 20px; }
+.hypothesis-list article > span { display: grid; place-items: center; align-self: start; width: 42px; height: 42px; background: var(--blue); color: #fff; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.hypothesis-list h4 { margin: 1px 0 6px; font-size: 1.02rem; }
+.hypothesis-list p { margin: 0; color: var(--muted); font-size: .93rem; }
+
+.protocol-wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--paper); }
+.protocol-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: .88rem; line-height: 1.45; }
+.protocol-table th, .protocol-table td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 14px; text-align: left; vertical-align: top; }
+.protocol-table th:last-child, .protocol-table td:last-child { border-right: 0; }
+.protocol-table tbody tr:last-child td { border-bottom: 0; }
+.protocol-table th { background: var(--navy); color: #fff; font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.protocol-table td:first-child { color: var(--blue); font-weight: 900; }
+.protocol-table .method-row { background: var(--blue-soft); }
+.compact-table { min-width: 660px; }
+
 /* Steps and resources */
 .steps { margin: 0; padding: 0; list-style: none; counter-reset: none; }
 .steps > li { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 26px; border-top: 1px solid var(--line); padding: 28px 0; }

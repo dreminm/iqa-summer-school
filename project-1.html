@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Student guide for the Instruction-Conditioned Quality Embeddings research project.">
-  <title>Project 01 · Instruction-Conditioned Quality Embeddings</title>
+  <meta name="description" content="Research brief for criterion-conditioned quality readout from frozen CLIP spatial tokens.">
+  <title>Project 01 · Criterion-Conditioned Quality Readout</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="project-1">
@@ -24,14 +24,14 @@
 
   <main>
     <section class="project-hero shell">
-      <p class="kicker">Project 01 · No-reference IQA</p>
-      <h1>Instruction-Conditioned Quality Embeddings</h1>
-      <p class="hero-question">Can one compact visual encoder produce different quality representations of the same image depending on what a natural-language instruction asks it to assess?</p>
+      <p class="kicker">Project 01 · Multi-attribute NR-IQA</p>
+      <h1>Criterion-Conditioned Quality Readout</h1>
+      <p class="hero-question">Can a natural-language criterion change which evidence a small query module extracts from the same frozen CLIP spatial tokens?</p>
       <dl class="project-facts">
-        <div><dt>Core data</dt><dd>KonIQ-10k + SPAQ</dd></div>
-        <div><dt>Visual encoder</dt><dd>Frozen CLIP ViT-B/16</dd></div>
-        <div><dt>Conditions</dt><dd>Instruction + ARNIQA prior</dd></div>
-        <div><dt>Final artifact</dt><dd>Multi-criteria quality encoder</dd></div>
+        <div><dt>Supervision</dt><dd>SPAQ human ratings</dd></div>
+        <div><dt>Transfer test</dt><dd>CID2013 attributes</dd></div>
+        <div><dt>Visual features</dt><dd>Frozen CLIP-B/16 layer</dd></div>
+        <div><dt>Artifact</dt><dd>Small query readout</dd></div>
       </dl>
     </section>
 
@@ -46,25 +46,35 @@
       <section class="brief-section" id="problem">
         <div class="section-label"><span>01</span><h2>Problem</h2></div>
         <div class="section-content">
-          <p class="section-intro">Standard NR-IQA models produce one fixed representation and one overall quality score. This project studies whether quality features can instead be extracted according to a natural-language instruction such as <em>assess sharpness</em>, <em>estimate visible noise</em>, or <em>judge overall perceptual quality</em>.</p>
+          <p class="section-intro">The preceding encoder study asks <em>where</em> pretrained models store quality information. This project starts from one screened CLIP encoder and asks <em>how</em> criterion-specific evidence should be read from its spatial tokens—and whether the answer changes across criteria, layers, instructions, and perceptual priors.</p>
 
           <div class="research-question">
             <span>Research question</span>
-            <strong>Can instruction-conditioned queries turn the same CLIP tokens into criterion-specific quality embeddings, and does an image-specific ARNIQA prior make this readout more accurate and robust?</strong>
+            <strong>Does conditioning the spatial readout on a criterion produce more accurate and genuinely criterion-specific representations than fixed pooling, task IDs, or language added only after pooling?</strong>
           </div>
 
           <div class="two-column">
             <article class="plain-card">
-              <h3>Instruction</h3>
-              <p>Defines <em>what</em> to evaluate: overall quality, sharpness, noise, contrast, colorfulness, or exposure. Its embedding changes the query used to read the image.</p>
+              <h3>Criterion instruction</h3>
+              <p>States what the score means. It is shared across images and should change the queries before they attend to patch tokens.</p>
             </article>
             <article class="plain-card">
               <h3>ARNIQA prior</h3>
-              <p>Describes <em>how the image is degraded</em>. Its frozen distortion-manifold embedding supplies image-specific perceptual information that text alone cannot provide.</p>
+              <p>Provides image-specific distortion-manifold information. It may complement the instruction, but it must beat an ARNIQA-only control and simple late fusion.</p>
             </article>
           </div>
 
-          <p class="rule"><strong>Central hypothesis:</strong> language should control feature extraction, not merely be concatenated after visual pooling. ARNIQA is a complementary perceptual prior, not a replacement for the instruction.</p>
+          <h3 class="subheading">Starting hypotheses—not project limits</h3>
+          <div class="hypothesis-list">
+            <article><span>H1</span><div><h4>Task-dependent readout</h4><p>Instruction-conditioned queries outperform an unconditioned query readout and post-pooling instruction fusion.</p></div></article>
+            <article><span>H2</span><div><h4>Language carries semantics</h4><p>Full instructions need not beat a task ID on familiar prompts; they should be more stable on unseen paraphrases and CID2013 terminology. Otherwise the model is only task-conditioned, not instruction-driven.</p></div></article>
+            <article><span>H3</span><div><h4>ARNIQA is complementary</h4><p>A correct image prior improves instruction queries beyond ARNIQA-only and late-fusion controls, especially for noisiness and sharpness, and loses value when matched priors are shuffled.</p></div></article>
+            <article><span>H4</span><div><h4>Criteria use the hierarchy differently</h4><p>The layer selected for overall MOS may not be optimal for sharpness, noise, color, or contrast. A conditioned readout may benefit from a small set of complementary screened layers.</p></div></article>
+            <article><span>H5</span><div><h4>Queries can specialize</h4><p>Multiple queries may divide into local artifact, global appearance, and semantic-context roles. Their number, diversity, and interaction may matter more than a larger prediction head.</p></div></article>
+            <article><span>H6</span><div><h4>Shared learning can help or interfere</h4><p>Related criteria may improve one another, while conflicting score semantics may cause negative transfer. Conditioning should be compared with specialists and ordinary multi-task learning.</p></div></article>
+          </div>
+
+          <p class="rule"><strong>Research scope:</strong> six human-rated SPAQ criteria provide the empirical center, not the conceptual boundary. Controlled distortions, held-out terminology, layer composition, and new criteria may be explored when they test a stated hypothesis. Open-vocabulary scoring is a possible research question, not a claim granted by the dataset.</p>
         </div>
       </section>
 
@@ -73,39 +83,82 @@
         <div class="section-content">
           <div class="status-line">
             <span>Baseline status</span>
-            <strong>Specified here · implementation pending</strong>
+            <strong>Reference baseline fixed · research space open</strong>
           </div>
-          <p class="section-intro">Use a frozen CLIP ViT-B/16 and the screen-selected intermediate layer from the preceding encoder study. The main model is trained jointly on MOS and low-level attribute scores.</p>
+          <p class="section-intro">The reference experiment uses the exact CLIP ViT-B/16 checkpoint, selected intermediate layer, input transform, and score convention from the encoder screen. This gives every later exploration a stable point of comparison; it does not forbid studying nearby or complementary layers.</p>
 
-          <div class="model-flow" aria-label="Proposed architecture">
-            <div><small>Inputs</small><strong>Image + instruction</strong></div>
-            <span aria-hidden="true">→</span>
+          <div class="model-flow" role="img" aria-label="Proposed architecture">
             <div><small>Frozen</small><strong>CLIP patch tokens</strong></div>
             <span aria-hidden="true">+</span>
-            <div><small>Frozen</small><strong>ARNIQA embedding</strong></div>
+            <div><small>Cached</small><strong>Instruction embedding</strong></div>
+            <span aria-hidden="true">+</span>
+            <div><small>Optional frozen</small><strong>ARNIQA embedding</strong></div>
             <span aria-hidden="true">→</span>
-            <div><small>Trainable</small><strong>Conditioned queries</strong></div>
+            <div><small>Trainable</small><strong>Four conditioned queries</strong></div>
             <span aria-hidden="true">→</span>
-            <div class="accent"><small>Output</small><strong>Quality embedding + score</strong></div>
+            <div class="accent"><small>Output</small><strong>Embedding + scalar</strong></div>
           </div>
 
           <div class="spec-grid">
-            <div><span>Visual features</span><strong>CLIP-B/16 patch tokens, selected layer</strong></div>
-            <div><span>Instruction encoder</span><strong>Frozen text embedder; embeddings may be cached</strong></div>
-            <div><span>Perceptual prior</span><strong>Frozen ARNIQA encoder embedding</strong></div>
-            <div><span>Supervision</span><strong>MOS + criterion-specific attribute scores</strong></div>
+            <div><span>Query block</span><strong>Width 128 · 4 queries · 1 cross-attention block</strong></div>
+            <div><span>Conditioning</span><strong>Q = Q<sub>0</sub> + W<sub>t</sub>t (+ W<sub>a</sub>a(x))</strong></div>
+            <div><span>Text encoder</span><strong>Frozen Qwen3-Embedding-0.6B · cached bank</strong></div>
+            <div><span>Trainable budget</span><strong>≤ 1M parameters · matched within 5%</strong></div>
+            <div><span>Loss</span><strong>Smooth L1 on train-only z-scored targets</strong></div>
+            <div><span>Core adaptation</span><strong>Readout only · no CLIP LoRA</strong></div>
           </div>
 
-          <h3 class="subheading">Required comparison</h3>
-          <div class="variant-grid">
-            <article><span>B0</span><h4>Specialists</h4><p>One independently trained model per quality criterion.</p></article>
-            <article><span>B1</span><h4>Task ID</h4><p>One shared model conditioned by a learned discrete criterion ID.</p></article>
-            <article><span>B2</span><h4>Late instruction</h4><p>Natural-language embedding concatenated after visual pooling.</p></article>
-            <article><span>M1</span><h4>Instruction queries</h4><p>Instruction embedding modulates learned queries before cross-attention.</p></article>
-            <article><span>M2</span><h4>Instruction + ARNIQA</h4><p>Queries combine task intent with an image-specific perceptual prior.</p></article>
+          <h3 class="subheading">Core comparison</h3>
+          <div class="protocol-wrap">
+            <table class="protocol-table">
+              <thead><tr><th>ID</th><th>Visual readout</th><th>Task signal</th><th>ARNIQA</th><th>Question isolated</th></tr></thead>
+              <tbody>
+                <tr><td>B0</td><td>Native pooling</td><td>Six output coordinates</td><td>—</td><td>Preceding-study baseline; representation never changes by task</td></tr>
+                <tr><td>B1</td><td>Unconditioned queries</td><td>Six output coordinates</td><td>—</td><td>Do learned queries help without conditioning?</td></tr>
+                <tr><td>B2</td><td>Conditioned queries</td><td>Learned task ID</td><td>—</td><td>Is semantic language needed?</td></tr>
+                <tr><td>B3</td><td>Conditioned queries</td><td>Short criterion name</td><td>—</td><td>Does a text embedding beat an arbitrary ID?</td></tr>
+                <tr><td>B4</td><td>Unconditioned queries</td><td>Full instruction after pooling</td><td>—</td><td>Late fusion versus changing the readout</td></tr>
+                <tr class="method-row"><td>M1</td><td>Conditioned queries</td><td>Full instruction</td><td>—</td><td>Main instruction-conditioning hypothesis</td></tr>
+                <tr><td>P0</td><td>ARNIQA embedding</td><td>Six output coordinates</td><td>Only encoder</td><td>Strength of the prior by itself</td></tr>
+                <tr><td>P1</td><td>M1 queries</td><td>Full instruction</td><td>Late fusion</td><td>Second encoder versus query conditioning</td></tr>
+                <tr class="method-row"><td>M2</td><td>Conditioned queries</td><td>Full instruction</td><td>Conditions queries</td><td>Does the image prior change token selection?</td></tr>
+              </tbody>
+            </table>
           </div>
+          <p class="rule"><strong>Purpose of the core matrix:</strong> B0–M2 is the attribution spine of the project. It establishes whether there is a real conditioning signal before architecture exploration. Later variants are welcome when they test a concrete question rather than merely adding modules.</p>
 
-          <p class="rule"><strong>Fair comparison:</strong> keep the visual features, training split, optimizer, and trainable head budget fixed. Report the full CLIP + ARNIQA cost for M2; cached instruction embeddings do not add per-image text-encoder latency.</p>
+          <h3 class="subheading">Research axes after the reference model</h3>
+          <div class="protocol-wrap">
+            <table class="protocol-table">
+              <thead><tr><th>Axis</th><th>Experiments worth running</th><th>Scientific question</th></tr></thead>
+              <tbody>
+                <tr><td>Visual hierarchy</td><td>Selected layer; a narrow layer neighborhood; learned mixture of 2–3 screened layers; criterion-specific layer weights</td><td>Is quality evidence criterion-dependent across depth?</td></tr>
+                <tr><td>Query structure</td><td>1/4/8 queries; one versus two readout blocks; diversity or orthogonality regularization; shared versus criterion-specific base queries</td><td>Do queries discover distinct evidence or act as redundant pooling tokens?</td></tr>
+                <tr><td>Conditioning site</td><td>Additive query initialization; query normalization/modulation; instruction as a query token; conditioning keys/values when diagnostics justify it</td><td>Where must task information enter to change the representation?</td></tr>
+                <tr><td>Instruction content</td><td>Name, definition, scale direction, perceptual context, ambiguous or contradictory wording, paraphrases, and controlled changes in specificity</td><td>Which parts of natural language are actually used?</td></tr>
+                <tr><td>Task interaction</td><td>Six specialists; shared multi-output model; balanced multi-task sampling; learned task weights; leave-one-criterion-out training</td><td>When does sharing transfer knowledge, and when does it cause interference?</td></tr>
+                <tr><td>Perceptual prior</td><td>ARNIQA as query condition, prior token, late feature, or confidence signal; correct and matched-shuffled priors</td><td>Does distortion geometry guide evidence selection or merely add another predictor?</td></tr>
+                <tr><td>Criterion generalization</td><td>CID2013 synonyms; held-out SPAQ criterion; synthetic blur/noise/compression tasks; zero-shot and few-shot calibration</td><td>Can instructions support a new criterion, or only rename trained task IDs?</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="rule"><strong>Exploration rule:</strong> the grid is deliberately not fully Cartesian. Use the reference model to identify a failure or ambiguity, choose the axis that can explain it, and record why that experiment was added.</p>
+
+          <h3 class="subheading">Human-supervised criteria</h3>
+          <div class="protocol-wrap">
+            <table class="protocol-table compact-table">
+              <thead><tr><th>Target</th><th>Canonical instruction</th><th>Higher score means</th></tr></thead>
+              <tbody>
+                <tr><td>Overall MOS</td><td>Assess the overall technical perceptual quality of this image, ignoring aesthetic preference. Higher scores mean better quality.</td><td>Better quality</td></tr>
+                <tr><td>Brightness</td><td>Assess how bright the image appears. Higher scores mean brighter.</td><td>Brighter</td></tr>
+                <tr><td>Colorfulness</td><td>Assess how colorful the image appears. Higher scores mean more colorful.</td><td>More colorful</td></tr>
+                <tr><td>Contrast</td><td>Assess the perceived contrast of the image. Higher scores mean more contrast.</td><td>More contrast</td></tr>
+                <tr><td>Noisiness</td><td>Assess the amount of visible noise in the image. Higher scores mean more visible noise.</td><td>More visible noise</td></tr>
+                <tr><td>Sharpness</td><td>Assess the apparent sharpness of the image. Higher scores mean sharper.</td><td>Sharper</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="rule"><strong>Interpretation:</strong> brightness, colorfulness, contrast, and noisiness are degrees, not “goodness” scores. Preserve SPAQ's directions; do not silently flip them into quality labels.</p>
         </div>
       </section>
 
@@ -114,51 +167,82 @@
         <div class="section-content">
           <ol class="steps">
             <li>
-              <div><span>Step 1</span><h3>Study the core mechanisms</h3></div>
+              <div><span>Step 1</span><h3>Read the closest work</h3></div>
               <div class="resource-list">
-                <a href="https://arxiv.org/abs/2506.05176"><strong>Qwen3 Embedding</strong><span>How task instructions shape a general-purpose embedding model.</span></a>
-                <a href="https://arxiv.org/abs/2401.00368"><strong>E5-Mistral</strong><span>Why a full natural-language instruction can outperform a short task prefix.</span></a>
-                <a href="https://arxiv.org/abs/2310.14918"><strong>ARNIQA</strong><span>A learned distortion manifold used here as the image-specific perceptual prior.</span></a>
-                <a href="https://arxiv.org/abs/2404.14949"><strong>MP-IQE</strong><span>Query-based aggregation and multimodal prompting in IQA.</span></a>
+                <a href="https://arxiv.org/abs/2207.12396"><strong>CLIP-IQA</strong><span>Text controls pooled image–text similarity through antonym prompts; it does not condition a spatial readout.</span></a>
+                <a href="https://ojs.aaai.org/index.php/AAAI/article/view/25302"><strong>DEIQT</strong><span>A fixed learned quality query over transformer features; the direct readout baseline.</span></a>
+                <a href="https://arxiv.org/abs/2406.01020"><strong>ATTIQA</strong><span>Uses five quality attributes and text prompts for pseudo-label pretraining, not criterion-conditioned inference.</span></a>
+                <a href="https://arxiv.org/abs/2404.14949"><strong>MP-IQE</strong><span>Combines visual and language prompts for IQA; use it to state the boundary of the proposed contribution.</span></a>
+                <a href="https://arxiv.org/abs/2506.05176"><strong>Qwen3 Embedding</strong><span>Motivation for instruction-aware text embeddings. Its retrieval results are not evidence that full instructions will help IQA.</span></a>
+                <a href="https://arxiv.org/abs/2310.14918"><strong>ARNIQA</strong><span>The frozen distortion-manifold prior and its official full-/half-scale embedding path.</span></a>
               </div>
             </li>
             <li>
-              <div><span>Step 2</span><h3>Prepare multi-criteria supervision</h3></div>
-              <div class="dataset-list">
-                <div><strong>KonIQ-10k</strong><span>MOS plus brightness, contrast, colorfulness, and sharpness scores.</span><a href="https://database.mmsp-kn.de/koniq-10k-database.html">Official download</a></div>
-                <div><strong>SPAQ</strong><span>MOS plus brightness, contrast, colorfulness, noisiness, and sharpness scores.</span><a href="https://github.com/h4nwei/SPAQ">Dataset page</a></div>
-                <div><strong>KADID-10k</strong><span>Controlled distortion and severity tasks for synthetic pretraining and diagnostics.</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official download</a></div>
-              </div>
-            </li>
-            <li>
-              <div><span>Step 3</span><h3>Create the starter repository</h3></div>
+              <div><span>Step 2</span><h3>Lock the data roles</h3></div>
               <div>
-                <p>Build one shared pipeline for all variants. Keep instructions and intervention tests first-class experiment inputs.</p>
-                <pre><code>src/iqa/data/            # datasets, attributes, score normalization
-src/iqa/encoders/        # CLIP, instruction, and ARNIQA wrappers
-src/iqa/heads/           # pooling, late fusion, conditioned queries
-src/iqa/evaluation/      # SRCC, PLCC, transfer, interventions
-configs/                 # one file per controlled variant
-prompts/                 # train and held-out instruction paraphrases
-scripts/train.py
-scripts/evaluate.py
-tests/</code></pre>
+                <div class="dataset-list">
+                  <div><strong>SPAQ</strong><span>11,125 authentic smartphone photos; MOS plus five human attribute scores. The only core training set.</span><a href="https://github.com/h4nwei/SPAQ">Official page</a></div>
+                  <div><strong>CID2013</strong><span>480 consumer-camera photos; MOS, sharpness, graininess, lightness, and color saturation. Zero-shot attribute transfer only.</span><a href="https://zenodo.org/records/2647033">Official record</a></div>
+                  <div><strong>KonIQ-10k</strong><span>10,073 authentic images. Use human MOS only for the overall-quality transfer check.</span><a href="https://database.mmsp-kn.de/koniq-10k-database.html">Official page</a></div>
+                  <div><strong>LIVE Challenge</strong><span>1,162 authentically distorted images. Overall-quality transfer check; no attribute claim.</span><a href="https://live.ece.utexas.edu/research/ChallengeDB/index.html">Official page</a></div>
+                  <div><strong>KADID-10k</strong><span>81 references with controlled distortions. Diagnostic stress tests only; type and severity are not human attribute ratings.</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official page</a></div>
+                </div>
+                <p class="rule"><strong>Do not train on KonIQ indicators as human labels:</strong> its brightness, colorfulness, contrast, and sharpness files are computed diversity indicators, separate from the subjective MOS file.</p>
               </div>
             </li>
             <li>
-              <div><span>Step 4</span><h3>Establish the baselines</h3></div>
+              <div><span>Step 3</span><h3>Freeze evaluation, not hypotheses</h3></div>
               <div>
                 <ul class="clean-list compact-list">
-                  <li>Reproduce one specialist model per criterion.</li>
-                  <li>Train the shared task-ID and late-instruction baselines.</li>
-                  <li>Use multiple instruction paraphrases and reserve unseen phrasings for evaluation.</li>
-                  <li>Verify that different criteria produce different targets for the same image.</li>
+                  <li><strong>Development:</strong> one fixed SPAQ split and one seed; results are not reportable.</li>
+                  <li><strong>Headline:</strong> five approximately 72/8/20 train/validation/test splits grouped by smartphone model, with three training seeds per split.</li>
+                  <li><strong>Literature track:</strong> five fixed image-random 72/8/20 splits, reported separately because cameras can occur in every partition.</li>
+                  <li><strong>Paired-camera track:</strong> remove SPAQ's 1,000 repeated-scene images from training, then report within-scene ranking across cameras.</li>
+                  <li><strong>Selection:</strong> choose epochs and shared hyperparameters by validation macro SRCC. Criterion-specific analysis is allowed, but test labels cannot choose a variant.</li>
+                  <li><strong>Transforms:</strong> use the screened CLIP transform for every variant; no blur, JPEG, color, contrast, or random-resize augmentation.</li>
+                </ul>
+                <p>Commit split manifests, prompt lists, target statistics, checkpoint revisions, and the chosen CLIP layer before the main runs.</p>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 4</span><h3>Build the reference, then investigate</h3></div>
+              <div>
+                <ul class="clean-list compact-list">
+                  <li><strong>Reference:</strong> B0 and B1 establish native-pooling and unconditioned-query behavior.</li>
+                  <li><strong>Conditioning study:</strong> B2–B4 and M1 separate task identity, text content, and conditioning location.</li>
+                  <li><strong>Prior study:</strong> P0, P1, and M2 separate ARNIQA's predictive value from its role in spatial readout. Use the same image crop for both encoders and the frozen full-/half-scale embedding without its MOS regressor.</li>
+                  <li><strong>Research branches:</strong> choose layer, query, instruction, task-interaction, or prior experiments from the observed failure modes. More than one branch may be pursued.</li>
+                  <li><strong>Scale-up:</strong> CLIP-L/14-336 tests capacity. LoRA tests whether adaptation changes the useful layer or the value of conditioning; both are legitimate later research stages.</li>
                 </ul>
               </div>
             </li>
             <li>
-              <div><span>Step 5</span><h3>Test conditioning and transfer</h3></div>
-              <div><p>Train M1 before adding ARNIQA in M2. Evaluate per-criterion accuracy, KonIQ↔SPAQ transfer, unseen instruction paraphrases, and matched, wrong, shuffled, or zeroed conditions. Inspect whether instructions change query attention over the same image.</p></div>
+              <div><span>Step 5</span><h3>Evaluate behavior, not only scores</h3></div>
+              <div class="protocol-wrap">
+                <table class="protocol-table">
+                  <thead><tr><th>Test</th><th>Protocol</th><th>What it rules out</th></tr></thead>
+                  <tbody>
+                    <tr><td>Accuracy</td><td>Per-criterion SRCC; macro SRCC primary. Raw PLCC and MAE secondary. No logistic fit on test labels.</td><td>A gain hidden in one easy attribute</td></tr>
+                    <tr><td>Paraphrases</td><td>Train on one canonical instruction; evaluate a locked set of unseen human-audited paraphrases. Report mean and worst-prompt SRCC.</td><td>Memorizing six prompt strings</td></tr>
+                    <tr><td>Instruction intervention</td><td>Correct, wrong, shuffled, and zeroed conditions. Compare each output with both the requested and substituted target.</td><td>Ignoring language or using it as a constant bias</td></tr>
+                    <tr><td>Prior intervention</td><td>Correct ARNIQA embedding versus zero and a permutation within overall-MOS deciles.</td><td>Using ARNIQA only as a global quality shortcut</td></tr>
+                    <tr><td>Representation</td><td>Within-image distance across criteria versus distance across paraphrases of one criterion.</td><td>Different scores from an unchanged representation</td></tr>
+                    <tr><td>Spatial diagnostic</td><td>Apply held-out localized blur/noise to KADID references; measure attention mass in the known mask and top-attended-patch occlusion effects.</td><td>Treating attention maps as self-validating explanations</td></tr>
+                    <tr><td>Transfer</td><td>SPAQ → CID2013 with no fitting: overall↔MOS, brightness↔lightness, colorfulness↔saturation, noisiness↔graininess, sharpness↔sharpness; macro by scene. Test the overall instruction on KonIQ-10k and LIVE Challenge.</td><td>Dataset-specific wording and camera cues</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </li>
+            <li>
+              <div><span>Step 6</span><h3>Report uncertainty and cost</h3></div>
+              <div>
+                <ul class="clean-list compact-list">
+                  <li>Report every criterion, split, and seed; aggregate with median and a 95% group-bootstrap confidence interval over cameras or scenes.</li>
+                  <li>Report paired confidence intervals for the primary comparisons and effect sizes per criterion. Distinguish statistical uncertainty from practical value instead of imposing one universal threshold.</li>
+                  <li>Measure batch-1 median and p95 latency after warm-up, peak VRAM, parameters, and FLOPs on one fixed device and precision.</li>
+                  <li>For M2, count both CLIP and ARNIQA, both ARNIQA scales, preprocessing, and the query head. Report the cached-prompt setting separately from open-prompt text-encoder cost.</li>
+                </ul>
+              </div>
             </li>
           </ol>
         </div>
@@ -167,18 +251,28 @@ tests/</code></pre>
       <section class="brief-section" id="result">
         <div class="section-label"><span>04</span><h2>Expected result</h2></div>
         <div class="section-content">
-          <p class="section-intro">The project should produce one compact encoder that returns a quality embedding and score for a requested perceptual criterion, while making the contribution of language and the ARNIQA prior measurable.</p>
+          <p class="section-intro">The deliverable is both a compact criterion-conditioned readout and an evidence-backed account of how language, spatial queries, layer choice, task sharing, and perceptual priors interact.</p>
 
           <div class="deliverable-grid">
-            <article><span>01</span><h3>Quality encoder</h3><p>A trained instruction-conditioned query adapter over frozen CLIP features, with an optional ARNIQA prior.</p></article>
-            <article><span>02</span><h3>Controlled benchmark</h3><p>Specialists, task IDs, late fusion, instruction queries, and instruction + ARNIQA under one protocol.</p></article>
-            <article><span>03</span><h3>Behavior evidence</h3><p>Paraphrase consistency, wrong-instruction and shuffled-prior interventions, plus criterion-dependent attention maps.</p></article>
-            <article><span>04</span><h3>Reusable artifacts</h3><p>Code, configurations, prompt bank, checkpoints, and a simple API for criterion-conditioned scoring.</p></article>
+            <article><span>01</span><h3>Criterion readout</h3><p>A ≤1M-parameter query module with a simple <code>encode(image, instruction)</code> interface returning an embedding and score.</p></article>
+            <article><span>02</span><h3>Research map</h3><p>A structured comparison of layers, query behavior, instruction content, task interaction, and ARNIQA integration.</p></article>
+            <article><span>03</span><h3>Reproducible benchmark</h3><p>Split manifests, prompt bank, target mappings, causal interventions, checkpoints, and per-seed predictions.</p></article>
+            <article><span>04</span><h3>Honest system cost</h3><p>CLIP-only and CLIP+ARNIQA accuracy–cost points, including the second encoder and prompt-serving assumptions.</p></article>
+          </div>
+
+          <h3 class="subheading">Questions the final report must answer</h3>
+          <div class="hypothesis-list">
+            <article><span>01</span><div><h4>What changes the representation?</h4><p>Separate the effects of learned queries, task identity, language content, conditioning location, and the ARNIQA signal.</p></div></article>
+            <article><span>02</span><div><h4>Where is each criterion represented?</h4><p>Determine whether one screened layer is sufficient or different criteria require different depths or a multi-layer readout.</p></div></article>
+            <article><span>03</span><div><h4>What do multiple queries learn?</h4><p>Test whether queries specialize spatially or functionally, and connect that behavior to accuracy and robustness.</p></div></article>
+            <article><span>04</span><div><h4>Is language more than a task identifier?</h4><p>Use paraphrases, altered definitions, held-out terminology, and criterion transfer—not only in-domain scores.</p></div></article>
+            <article><span>05</span><div><h4>When does ARNIQA help?</h4><p>Identify criteria, images, and integration points where the prior adds image-specific information, together with its full cost.</p></div></article>
+            <article><span>06</span><div><h4>What generalizes?</h4><p>Measure transfer across cameras, scenes, datasets, wording, and—where the supervision permits—previously unseen criteria.</p></div></article>
           </div>
 
           <div class="result-rule">
-            <span>Success criterion</span>
-            <p>Full natural-language instructions must outperform a discrete task ID, query conditioning must outperform late fusion, and ARNIQA must add a reproducible gain beyond instruction-only queries. The best model should retain that gain on cross-dataset transfer and unseen paraphrases.</p>
+            <span>Valid negative result</span>
+            <p>If a task ID matches language, late fusion matches query conditioning, criteria prefer different layers, queries do not specialize, or ARNIQA adds no image-specific gain, explain that boundary. The outcome is a map of what works, what fails, and why—not a requirement to validate one preselected architecture.</p>
           </div>
         </div>
       </section>
@@ -186,7 +280,7 @@ tests/</code></pre>
   </main>
 
   <footer class="site-footer shell">
-    <span>Project 01 · Instruction-Conditioned Quality Embeddings</span>
+    <span>Project 01 · Criterion-Conditioned Quality Readout</span>
     <a href="project-2.html">Next project →</a>
   </footer>
 </body>
