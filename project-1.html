@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Student guide for the Distortion-Conditioned NR-IQA research project.">
-  <title>Project 01 · Distortion-Conditioned NR-IQA</title>
+  <meta name="description" content="Student guide for the Instruction-Conditioned Quality Embeddings research project.">
+  <title>Project 01 · Instruction-Conditioned Quality Embeddings</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body data-page="project-1">
   <header class="site-header">
     <div class="nav shell">
-      <a class="brand" href="index.html" aria-label="Image Quality R&D School home">
+      <a class="brand" href="index.html" aria-label="Image Quality R&amp;D School home">
         <span class="brand-mark" aria-hidden="true">IQ</span>
         <span class="brand-copy"><strong>Image Quality</strong><small>R&amp;D School</small></span>
       </a>
@@ -25,13 +25,13 @@
   <main>
     <section class="project-hero shell">
       <p class="kicker">Project 01 · No-reference IQA</p>
-      <h1>Distortion-Conditioned NR-IQA</h1>
-      <p class="hero-question">Does a predicted distortion representation improve blind image-quality prediction—and which injection mechanism works best?</p>
+      <h1>Instruction-Conditioned Quality Embeddings</h1>
+      <p class="hero-question">Can one compact visual encoder produce different quality representations of the same image depending on what a natural-language instruction asks it to assess?</p>
       <dl class="project-facts">
-        <div><dt>Core data</dt><dd>KADID-10k</dd></div>
-        <div><dt>Image encoder</dt><dd>Frozen CLIP ViT-B/16</dd></div>
-        <div><dt>Primary metric</dt><dd>OOD SRCC</dd></div>
-        <div><dt>Final artifact</dt><dd>Controlled comparison</dd></div>
+        <div><dt>Core data</dt><dd>KonIQ-10k + SPAQ</dd></div>
+        <div><dt>Visual encoder</dt><dd>Frozen CLIP ViT-B/16</dd></div>
+        <div><dt>Conditions</dt><dd>Instruction + ARNIQA prior</dd></div>
+        <div><dt>Final artifact</dt><dd>Multi-criteria quality encoder</dd></div>
       </dl>
     </section>
 
@@ -46,35 +46,25 @@
       <section class="brief-section" id="problem">
         <div class="section-label"><span>01</span><h2>Problem</h2></div>
         <div class="section-content">
-          <p class="section-intro">Most NR-IQA models infer quality directly from image features. This project tests whether a separate, image-specific distortion representation <code>d(x)</code> makes the quality head more accurate on unseen distortion families.</p>
+          <p class="section-intro">Standard NR-IQA models produce one fixed representation and one overall quality score. This project studies whether quality features can instead be extracted according to a natural-language instruction such as <em>assess sharpness</em>, <em>estimate visible noise</em>, or <em>judge overall perceptual quality</em>.</p>
 
           <div class="research-question">
             <span>Research question</span>
-            <strong>With the image encoder, prior encoder, training data, loss, and parameter budget fixed, which way of injecting <code>d(x)</code> gives the best out-of-distribution quality prediction?</strong>
+            <strong>Can instruction-conditioned queries turn the same CLIP tokens into criterion-specific quality embeddings, and does an image-specific ARNIQA prior make this readout more accurate and robust?</strong>
           </div>
 
           <div class="two-column">
             <article class="plain-card">
-              <h3>Compare</h3>
-              <ul class="clean-list">
-                <li>No distortion prior</li>
-                <li>Additive query conditioning</li>
-                <li>FiLM query conditioning</li>
-                <li>Prefix key/value token</li>
-              </ul>
+              <h3>Instruction</h3>
+              <p>Defines <em>what</em> to evaluate: overall quality, sharpness, noise, contrast, colorfulness, or exposure. Its embedding changes the query used to read the image.</p>
             </article>
             <article class="plain-card">
-              <h3>Keep fixed</h3>
-              <ul class="clean-list">
-                <li>Frozen CLIP image encoder</li>
-                <li>Frozen ARNIQA prior encoder</li>
-                <li>Head width and trainable budget</li>
-                <li>Data splits, loss, and optimizer</li>
-              </ul>
+              <h3>ARNIQA prior</h3>
+              <p>Describes <em>how the image is degraded</em>. Its frozen distortion-manifold embedding supplies image-specific perceptual information that text alone cannot provide.</p>
             </article>
           </div>
 
-          <p class="rule"><strong>Blind setting:</strong> the model may use only the image at inference time. Ground-truth distortion labels are not model inputs.</p>
+          <p class="rule"><strong>Central hypothesis:</strong> language should control feature extraction, not merely be concatenated after visual pooling. ARNIQA is a complementary perceptual prior, not a replacement for the instruction.</p>
         </div>
       </section>
 
@@ -85,36 +75,37 @@
             <span>Baseline status</span>
             <strong>Specified here · implementation pending</strong>
           </div>
-          <p class="section-intro">There is no ready-made repository for this exact controlled experiment. Implement the no-prior model first. Do not add conditioning until it trains reliably and passes the sanity checks.</p>
+          <p class="section-intro">Use a frozen CLIP ViT-B/16 and the screen-selected intermediate layer from the preceding encoder study. The main model is trained jointly on MOS and low-level attribute scores.</p>
 
-          <div class="model-flow" aria-label="Baseline architecture">
-            <div><small>Input</small><strong>Image</strong></div>
+          <div class="model-flow" aria-label="Proposed architecture">
+            <div><small>Inputs</small><strong>Image + instruction</strong></div>
             <span aria-hidden="true">→</span>
             <div><small>Frozen</small><strong>CLIP patch tokens</strong></div>
+            <span aria-hidden="true">+</span>
+            <div><small>Frozen</small><strong>ARNIQA embedding</strong></div>
             <span aria-hidden="true">→</span>
-            <div><small>Trainable</small><strong>8-query cross-attention</strong></div>
+            <div><small>Trainable</small><strong>Conditioned queries</strong></div>
             <span aria-hidden="true">→</span>
-            <div><small>Trainable</small><strong>2-layer regressor</strong></div>
-            <span aria-hidden="true">→</span>
-            <div class="accent"><small>Output</small><strong>Quality score</strong></div>
+            <div class="accent"><small>Output</small><strong>Quality embedding + score</strong></div>
           </div>
 
           <div class="spec-grid">
-            <div><span>Checkpoint</span><strong><a href="https://huggingface.co/openai/clip-vit-base-patch16">openai/clip-vit-base-patch16</a></strong></div>
-            <div><span>Training data</span><strong>KADID-10k, 70/10/20 by reference ID</strong></div>
-            <div><span>Loss</span><strong>Smooth L1</strong></div>
-            <div><span>Seeds</span><strong>8, 19, 25</strong></div>
+            <div><span>Visual features</span><strong>CLIP-B/16 patch tokens, selected layer</strong></div>
+            <div><span>Instruction encoder</span><strong>Frozen text embedder; embeddings may be cached</strong></div>
+            <div><span>Perceptual prior</span><strong>Frozen ARNIQA encoder embedding</strong></div>
+            <div><span>Supervision</span><strong>MOS + criterion-specific attribute scores</strong></div>
           </div>
 
-          <h3 class="subheading">Conditioning variants</h3>
+          <h3 class="subheading">Required comparison</h3>
           <div class="variant-grid">
-            <article><span>B0</span><h4>No prior</h4><p>Learnable queries <code>Q</code>. This is the required baseline.</p></article>
-            <article><span>C1</span><h4>Additive</h4><p><code>Q′ = Q + Wd</code></p></article>
-            <article><span>C2</span><h4>FiLM</h4><p><code>Q′ = (1 + γ(d)) ⊙ Q + β(d)</code></p></article>
-            <article><span>C3</span><h4>Prefix K/V</h4><p>Append projected <code>d</code> to the image tokens as one key/value token.</p></article>
+            <article><span>B0</span><h4>Specialists</h4><p>One independently trained model per quality criterion.</p></article>
+            <article><span>B1</span><h4>Task ID</h4><p>One shared model conditioned by a learned discrete criterion ID.</p></article>
+            <article><span>B2</span><h4>Late instruction</h4><p>Natural-language embedding concatenated after visual pooling.</p></article>
+            <article><span>M1</span><h4>Instruction queries</h4><p>Instruction embedding modulates learned queries before cross-attention.</p></article>
+            <article><span>M2</span><h4>Instruction + ARNIQA</h4><p>Queries combine task intent with an image-specific perceptual prior.</p></article>
           </div>
 
-          <p class="rule"><strong>Distortion prior:</strong> use the normalized embedding from the frozen <a href="https://github.com/miccunifi/ARNIQA">ARNIQA encoder</a>, before its quality regressor. Project it to the query dimension with one trainable linear layer.</p>
+          <p class="rule"><strong>Fair comparison:</strong> keep the visual features, training split, optimizer, and trainable head budget fixed. Report the full CLIP + ARNIQA cost for M2; cached instruction embeddings do not add per-image text-encoder latency.</p>
         </div>
       </section>
 
@@ -123,51 +114,51 @@
         <div class="section-content">
           <ol class="steps">
             <li>
-              <div><span>Step 1</span><h3>Read three papers</h3></div>
+              <div><span>Step 1</span><h3>Study the core mechanisms</h3></div>
               <div class="resource-list">
-                <a href="https://arxiv.org/abs/2404.14949"><strong>MP-IQE</strong><span>Query-based aggregation and multimodal prompts. Use it for architecture context, not as the baseline implementation.</span></a>
-                <a href="https://arxiv.org/abs/2310.14918"><strong>ARNIQA</strong><span>Why its frozen representation is a reasonable distortion prior.</span></a>
-                <a href="https://openaccess.thecvf.com/content/CVPR2023/papers/Zhang_Blind_Image_Quality_Assessment_via_Vision-Language_Correspondence_A_Multitask_Learning_CVPR_2023_paper.pdf"><strong>LIQE</strong><span>Joint quality, scene, and distortion modelling with vision-language features.</span></a>
+                <a href="https://arxiv.org/abs/2506.05176"><strong>Qwen3 Embedding</strong><span>How task instructions shape a general-purpose embedding model.</span></a>
+                <a href="https://arxiv.org/abs/2401.00368"><strong>E5-Mistral</strong><span>Why a full natural-language instruction can outperform a short task prefix.</span></a>
+                <a href="https://arxiv.org/abs/2310.14918"><strong>ARNIQA</strong><span>A learned distortion manifold used here as the image-specific perceptual prior.</span></a>
+                <a href="https://arxiv.org/abs/2404.14949"><strong>MP-IQE</strong><span>Query-based aggregation and multimodal prompting in IQA.</span></a>
               </div>
             </li>
             <li>
-              <div><span>Step 2</span><h3>Download the datasets</h3></div>
+              <div><span>Step 2</span><h3>Prepare multi-criteria supervision</h3></div>
               <div class="dataset-list">
-                <div><strong>KADID-10k</strong><span>Train, validation, in-domain test, and distortion-family holdout.</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official download</a></div>
-                <div><strong>CSIQ</strong><span>External synthetic-distortion test only.</span><a href="https://s2.smu.edu/~eclarson/csiq.html">Author page</a></div>
-                <div><strong>TID2013</strong><span>External taxonomy transfer test only.</span><a href="https://www.ponomarenko.info/tid2013.htm">Official download</a></div>
+                <div><strong>KonIQ-10k</strong><span>MOS plus brightness, contrast, colorfulness, and sharpness scores.</span><a href="https://database.mmsp-kn.de/koniq-10k-database.html">Official download</a></div>
+                <div><strong>SPAQ</strong><span>MOS plus brightness, contrast, colorfulness, noisiness, and sharpness scores.</span><a href="https://github.com/h4nwei/SPAQ">Dataset page</a></div>
+                <div><strong>KADID-10k</strong><span>Controlled distortion and severity tasks for synthetic pretraining and diagnostics.</span><a href="https://database.mmsp-kn.de/kadid-10k-database.html">Official download</a></div>
               </div>
             </li>
             <li>
               <div><span>Step 3</span><h3>Create the starter repository</h3></div>
               <div>
-                <p>Use one shared pipeline for all variants. The repository should contain the baseline, experiment configs, evaluation code, and a minimal scoring service.</p>
-                <pre><code>src/iqa/data/            # manifests, splits, score normalization
-src/iqa/encoders/        # CLIP and ARNIQA wrappers
-src/iqa/heads/           # baseline and conditioning modules
-src/iqa/evaluation/      # SRCC, PLCC, bootstrap, latency
-configs/                 # one file per experiment
+                <p>Build one shared pipeline for all variants. Keep instructions and intervention tests first-class experiment inputs.</p>
+                <pre><code>src/iqa/data/            # datasets, attributes, score normalization
+src/iqa/encoders/        # CLIP, instruction, and ARNIQA wrappers
+src/iqa/heads/           # pooling, late fusion, conditioned queries
+src/iqa/evaluation/      # SRCC, PLCC, transfer, interventions
+configs/                 # one file per controlled variant
+prompts/                 # train and held-out instruction paraphrases
 scripts/train.py
 scripts/evaluate.py
-service/app.py            # POST /score
 tests/</code></pre>
               </div>
             </li>
             <li>
-              <div><span>Step 4</span><h3>Make the baseline trustworthy</h3></div>
+              <div><span>Step 4</span><h3>Establish the baselines</h3></div>
               <div>
                 <ul class="clean-list compact-list">
-                  <li>Build one manifest: <code>path, score, reference_id, distortion_id, severity</code>.</li>
-                  <li>Split by <code>reference_id</code>, never by individual distorted images.</li>
-                  <li>Pass one forward/backward batch.</li>
-                  <li>Overfit 64 images before the first full run.</li>
-                  <li>Freeze CLIP with <code>eval()</code> and <code>requires_grad=False</code>.</li>
+                  <li>Reproduce one specialist model per criterion.</li>
+                  <li>Train the shared task-ID and late-instruction baselines.</li>
+                  <li>Use multiple instruction paraphrases and reserve unseen phrasings for evaluation.</li>
+                  <li>Verify that different criteria produce different targets for the same image.</li>
                 </ul>
               </div>
             </li>
             <li>
-              <div><span>Step 5</span><h3>Run the controlled experiment</h3></div>
-              <div><p>Train B0 and C1–C3 with the same configuration. Then run seven distortion-family holdouts on KADID-10k and final zero-shot tests on CSIQ and TID2013. For C1–C3, evaluate the same trained checkpoint with matched, shuffled, and zeroed priors.</p></div>
+              <div><span>Step 5</span><h3>Test conditioning and transfer</h3></div>
+              <div><p>Train M1 before adding ARNIQA in M2. Evaluate per-criterion accuracy, KonIQ↔SPAQ transfer, unseen instruction paraphrases, and matched, wrong, shuffled, or zeroed conditions. Inspect whether instructions change query attention over the same image.</p></div>
             </li>
           </ol>
         </div>
@@ -176,18 +167,18 @@ tests/</code></pre>
       <section class="brief-section" id="result">
         <div class="section-label"><span>04</span><h2>Expected result</h2></div>
         <div class="section-content">
-          <p class="section-intro">The project is complete when the team can answer whether the prior helps, which injection mechanism is best, and whether the gain survives unseen distortions.</p>
+          <p class="section-intro">The project should produce one compact encoder that returns a quality embedding and score for a requested perceptual criterion, while making the contribution of language and the ARNIQA prior measurable.</p>
 
           <div class="deliverable-grid">
-            <article><span>01</span><h3>Reproducible code</h3><p>Versioned manifests and splits, locked dependencies, configs for B0/C1/C2/C3, tests, and one command for the best model.</p></article>
-            <article><span>02</span><h3>Comparison table</h3><p>Mean ± standard deviation over three seeds for KADID, seven family holdouts, CSIQ, and TID2013.</p></article>
-            <article><span>03</span><h3>Prior intervention</h3><p>Matched vs. shuffled vs. zeroed <code>d(x)</code> for every conditioning variant.</p></article>
-            <article><span>04</span><h3>Deployable scorer</h3><p>A minimal <code>POST /score</code> endpoint that returns the scalar score and inference time for the selected model.</p></article>
+            <article><span>01</span><h3>Quality encoder</h3><p>A trained instruction-conditioned query adapter over frozen CLIP features, with an optional ARNIQA prior.</p></article>
+            <article><span>02</span><h3>Controlled benchmark</h3><p>Specialists, task IDs, late fusion, instruction queries, and instruction + ARNIQA under one protocol.</p></article>
+            <article><span>03</span><h3>Behavior evidence</h3><p>Paraphrase consistency, wrong-instruction and shuffled-prior interventions, plus criterion-dependent attention maps.</p></article>
+            <article><span>04</span><h3>Reusable artifacts</h3><p>Code, configurations, prompt bank, checkpoints, and a simple API for criterion-conditioned scoring.</p></article>
           </div>
 
           <div class="result-rule">
-            <span>Primary decision rule</span>
-            <p>Rank models by mean distortion-family-holdout SRCC. Use external-dataset SRCC, trainable parameters, and batch-1 latency as secondary criteria. A clear negative result is valid if the protocol is reproducible.</p>
+            <span>Success criterion</span>
+            <p>Full natural-language instructions must outperform a discrete task ID, query conditioning must outperform late fusion, and ARNIQA must add a reproducible gain beyond instruction-only queries. The best model should retain that gain on cross-dataset transfer and unseen paraphrases.</p>
           </div>
         </div>
       </section>
@@ -195,7 +186,7 @@ tests/</code></pre>
   </main>
 
   <footer class="site-footer shell">
-    <span>Project 01 · Distortion-Conditioned NR-IQA</span>
+    <span>Project 01 · Instruction-Conditioned Quality Embeddings</span>
     <a href="project-2.html">Next project →</a>
   </footer>
 </body>
